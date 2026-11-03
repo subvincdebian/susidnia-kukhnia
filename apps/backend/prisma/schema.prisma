@@ -1,0 +1,150 @@
+generator client {
+  provider = "prisma-client"
+  output = "../src/generated/prisma"
+  importFileExtension = "js"
+}
+datasource db {
+  provider = "postgresql"
+}
+model Restaurant {
+  id Int @id @default(autoincrement())
+  name String @db.VarChar(100)
+  address String @db.VarChar(200)
+  phone String @db.VarChar(20)
+  catalog_key String? @unique @db.VarChar(100)
+  cuisine_type String @db.VarChar(50)
+  rating Decimal? @db.Decimal(3,2)
+  is_active Boolean @default(true)
+  created_at DateTime @default(dbgenerated("CURRENT_TIMESTAMP")) @db.Timestamp(6)
+  image_url String?
+  image_alt String?
+  website_url String?
+  menu_url String?
+  source_checked_at String? @db.VarChar(10)
+  source_note String?
+  latitude Float? @db.DoublePrecision
+  longitude Float? @db.DoublePrecision
+  coordinate_source String?
+  menu MenuItem[]
+  orders Order[]
+  @@map("restaurants")
+}
+model MenuItem {
+  id Int @id @default(autoincrement())
+  restaurant_id Int
+  name String @db.VarChar(100)
+  description String?
+  price Decimal @db.Decimal(10,2)
+  category String @db.VarChar(50)
+  is_available Boolean @default(true)
+  image_url String?
+  image_alt String?
+  source_url String?
+  portion String?
+  restaurant Restaurant @relation(fields:[restaurant_id],references:[id],onDelete:Cascade,onUpdate:NoAction)
+  order_items OrderItem[]
+  @@index([restaurant_id],map:"idx_menu_items_restaurant")
+  @@map("menu_items")
+}
+model Customer {
+  id Int @id @default(autoincrement())
+  full_name String @db.VarChar(100)
+  email String? @unique @db.VarChar(100)
+  phone String @unique @db.VarChar(20)
+  default_delivery_address String @db.VarChar(200)
+  created_at DateTime @default(dbgenerated("CURRENT_TIMESTAMP")) @db.Timestamp(6)
+  orders Order[]
+  @@map("customers")
+}
+model Courier {
+  id Int @id @default(autoincrement())
+  full_name String @db.VarChar(100)
+  phone String @unique @db.VarChar(20)
+  vehicle_type String @db.VarChar(30)
+  is_available Boolean @default(true)
+  is_active Boolean @default(true)
+  orders Order[]
+  @@map("couriers")
+}
+model Order {
+  id Int @id @default(autoincrement())
+  customer_id Int
+  restaurant_id Int
+  courier_id Int?
+  order_date DateTime @default(dbgenerated("CURRENT_TIMESTAMP")) @db.Timestamp(6)
+  delivery_address String @db.VarChar(200)
+  delivery_latitude Float? @db.DoublePrecision
+  delivery_longitude Float? @db.DoublePrecision
+  address_version Int @default(0)
+  courier_latitude Float? @db.DoublePrecision
+  courier_longitude Float? @db.DoublePrecision
+  courier_location_at DateTime? @db.Timestamp(6)
+  courier_location_source String? @db.VarChar(10)
+  recipient_name String? @db.VarChar(100)
+  recipient_phone String? @db.VarChar(20)
+  delivery_note String @default("")
+  total_amount Decimal @default(0) @db.Decimal(10,2)
+  delivery_status String @default("створено") @db.VarChar(30)
+  customer Customer @relation(fields:[customer_id],references:[id],onDelete:NoAction,onUpdate:NoAction)
+  restaurant Restaurant @relation(fields:[restaurant_id],references:[id],onDelete:NoAction,onUpdate:NoAction)
+  courier Courier? @relation(fields:[courier_id],references:[id],onDelete:NoAction,onUpdate:NoAction)
+  items OrderItem[]
+  review Review?
+  payment Payment?
+  checkout_request CheckoutRequest?
+  delivery_messages DeliveryMessage[]
+  @@index([customer_id,order_date(sort:Desc)],map:"idx_orders_customer_date")
+  @@index([restaurant_id],map:"idx_orders_restaurant")
+  @@map("orders")
+}
+model DeliveryMessage {
+  id Int @id @default(autoincrement())
+  order_id Int
+  sender String @db.VarChar(10)
+  body String @db.VarChar(1000)
+  request_key String @db.VarChar(64)
+  created_at DateTime @default(dbgenerated("CURRENT_TIMESTAMP")) @db.Timestamp(6)
+  order Order @relation(fields:[order_id],references:[id],onDelete:Restrict,onUpdate:NoAction)
+  @@unique([order_id,request_key],map:"uq_delivery_message_request")
+  @@index([order_id,id(sort:Desc)],map:"idx_delivery_messages_order")
+  @@map("delivery_messages")
+}
+model OrderItem {
+  id Int @id @default(autoincrement())
+  order_id Int
+  menu_item_id Int
+  quantity Int @default(1)
+  unit_price Decimal @db.Decimal(10,2)
+  order Order @relation(fields:[order_id],references:[id],onDelete:Cascade,onUpdate:NoAction)
+  menu_item MenuItem @relation(fields:[menu_item_id],references:[id],onDelete:NoAction,onUpdate:NoAction)
+  @@unique([order_id,menu_item_id],map:"uq_order_menu_item")
+  @@index([menu_item_id],map:"idx_order_items_menu")
+  @@map("order_items")
+}
+model CheckoutRequest {
+  request_key String @id @db.VarChar(64)
+  request_hash String @db.VarChar(64)
+  order_id Int? @unique
+  created_at DateTime @default(dbgenerated("CURRENT_TIMESTAMP")) @db.Timestamp(6)
+  order Order? @relation(fields:[order_id],references:[id],onDelete:Restrict,onUpdate:NoAction)
+  @@map("_checkout_requests")
+}
+model Review {
+  id Int @id @default(autoincrement())
+  order_id Int @unique
+  rating Int @db.SmallInt
+  comment String
+  created_at DateTime @default(dbgenerated("CURRENT_TIMESTAMP")) @db.Timestamp(6)
+  order Order @relation(fields:[order_id],references:[id],onDelete:NoAction,onUpdate:NoAction)
+  @@map("reviews")
+}
+model Payment {
+  id Int @id @default(autoincrement())
+  order_id Int @unique
+  amount Decimal @db.Decimal(10,2)
+  method String @db.VarChar(20)
+  paid_at DateTime @default(dbgenerated("CURRENT_TIMESTAMP")) @db.Timestamp(6)
+  refunded_at DateTime? @db.Timestamp(6)
+  order Order @relation(fields:[order_id],references:[id],onDelete:NoAction,onUpdate:NoAction)
+  @@map("payments")
+}

@@ -1,0 +1,814 @@
+{
+  "version": "demo-2026-10-v1",
+  "customers": [
+    {
+      "key": "customer-01",
+      "name": "Клієнт 01",
+      "email": "customer-01@example.test",
+      "phone": "+380000400001",
+      "address": "Демонстраційна адреса 11",
+      "created_at": "2026-09-25 09:00:00"
+    },
+    {
+      "key": "customer-02",
+      "name": "Клієнт 12",
+      "email": "demo-customer-02@example.test",
+      "phone": "+380000400002",
+      "address": "Демонстраційна адреса 12",
+      "created_at": "2026-09-25 09:00:00"
+    },
+    {
+      "key": "customer-03",
+      "name": "Клієнт 13",
+      "email": "demo-customer-03@example.test",
+      "phone": "+380000400003",
+      "address": "Демонстраційна адреса 13",
+      "created_at": "2026-09-25 09:00:00"
+    },
+    {
+      "key": "customer-04",
+      "name": "Клієнт 14",
+      "email": "demo-customer-04@example.test",
+      "phone": "+380000400004",
+      "address": "Демонстраційна адреса 14",
+      "created_at": "2026-09-25 09:00:00"
+    },
+    {
+      "key": "customer-05",
+      "name": "Клієнт 15",
+      "email": "demo-customer-05@example.test",
+      "phone": "+380000400005",
+      "address": "Демонстраційна адреса 15",
+      "created_at": "2026-09-25 09:00:00"
+    },
+    {
+      "key": "customer-06",
+      "name": "Клієнт 16",
+      "email": "demo-customer-06@example.test",
+      "phone": "+380000400006",
+      "address": "Демонстраційна адреса 16",
+      "created_at": "2026-09-25 09:00:00"
+    },
+    {
+      "key": "customer-07",
+      "name": "Клієнт 17",
+      "email": "demo-customer-07@example.test",
+      "phone": "+380000400007",
+      "address": "Демонстраційна адреса 17",
+      "created_at": "2026-09-25 09:00:00"
+    },
+    {
+      "key": "customer-08",
+      "name": "Клієнт 18",
+      "email": "demo-customer-08@example.test",
+      "phone": "+380000400008",
+      "address": "Демонстраційна адреса 18",
+      "created_at": "2026-09-25 09:00:00"
+    },
+    {
+      "key": "customer-09",
+      "name": "Клієнт 19",
+      "email": "demo-customer-09@example.test",
+      "phone": "+380000400009",
+      "address": "Демонстраційна адреса 19",
+      "created_at": "2026-09-25 09:00:00"
+    },
+    {
+      "key": "customer-10",
+      "name": "Клієнт 20",
+      "email": "demo-customer-10@example.test",
+      "phone": "+380000400010",
+      "address": "Демонстраційна адреса 20",
+      "created_at": "2026-09-25 09:00:00"
+    },
+    {
+      "key": "customer-11",
+      "name": "Клієнт 21",
+      "email": "demo-customer-11@example.test",
+      "phone": "+380000400011",
+      "address": "Демонстраційна адреса 21",
+      "created_at": "2026-09-25 09:00:00"
+    },
+    {
+      "key": "customer-12",
+      "name": "Клієнт 22",
+      "email": "demo-customer-12@example.test",
+      "phone": "+380000400012",
+      "address": "Демонстраційна адреса 22",
+      "created_at": "2026-09-25 09:00:00"
+    }
+  ],
+  "couriers": [
+    {
+      "key": "courier-01",
+      "name": "Кур’єр 07",
+      "phone": "+380000500001",
+      "vehicle": "велосипед"
+    },
+    {
+      "key": "courier-02",
+      "name": "Кур’єр 08",
+      "phone": "+380000500002",
+      "vehicle": "скутер"
+    },
+    {
+      "key": "courier-03",
+      "name": "Кур’єр 09",
+      "phone": "+380000500003",
+      "vehicle": "автомобіль"
+    },
+    {
+      "key": "courier-04",
+      "name": "Кур’єр 10",
+      "phone": "+380000500004",
+      "vehicle": "пішки"
+    },
+    {
+      "key": "courier-05",
+      "name": "Кур’єр 11",
+      "phone": "+380000500005",
+      "vehicle": "велосипед"
+    },
+    {
+      "key": "courier-06",
+      "name": "Кур’єр 12",
+      "phone": "+380000500006",
+      "vehicle": "автомобіль"
+    },
+    {
+      "key": "courier-07",
+      "name": "Кур’єр 13",
+      "phone": "+380000500007",
+      "vehicle": "скутер"
+    },
+    {
+      "key": "courier-08",
+      "name": "Кур’єр 14",
+      "phone": "+380000500008",
+      "vehicle": "велосипед"
+    },
+    {
+      "key": "courier-09",
+      "name": "Кур’єр 15",
+      "phone": "+380000500009",
+      "vehicle": "скутер"
+    },
+    {
+      "key": "courier-10",
+      "name": "Кур’єр 16",
+      "phone": "+380000500010",
+      "vehicle": "автомобіль"
+    }
+  ],
+  "orders": [
+    {
+      "key": "order-01",
+      "restaurant": "musafir-khmelnytskoho",
+      "customer": "customer-01",
+      "date": "2026-10-01 12:15:00",
+      "status": "доставлено",
+      "note": "Зателефонуйте перед доставкою.",
+      "items": [
+        {
+          "dish": "Янтик з яловичиною 1шт",
+          "quantity": 1
+        },
+        {
+          "dish": "Янтик з бараниною 1шт",
+          "quantity": 1
+        }
+      ],
+      "courier": "courier-01",
+      "payment": "картка",
+      "review": {
+        "rating": 5,
+        "comment": "Янтики приїхали гарячими. Прибори не поклали, як і просив."
+      }
+    },
+    {
+      "key": "order-02",
+      "restaurant": "greek",
+      "customer": "customer-02",
+      "date": "2026-10-02 13:15:00",
+      "status": "доставлено",
+      "note": "Без одноразових приборів.",
+      "items": [
+        {
+          "dish": "Гірос Класичний",
+          "quantity": 1
+        },
+        {
+          "dish": "Гірос із телятиною",
+          "quantity": 1
+        }
+      ],
+      "courier": "courier-02",
+      "payment": "готівка",
+      "review": {
+        "rating": 5,
+        "comment": "Гірос добре запакували, соус не протік."
+      }
+    },
+    {
+      "key": "order-03",
+      "restaurant": "kfc",
+      "customer": "customer-03",
+      "date": "2026-10-03 14:15:00",
+      "status": "доставлено",
+      "note": "Залиште замовлення біля входу.",
+      "items": [
+        {
+          "dish": "Шефбургер оригінальний NEW",
+          "quantity": 2
+        },
+        {
+          "dish": "Соло бакет оригінальний",
+          "quantity": 1
+        }
+      ],
+      "courier": "courier-03",
+      "payment": "картка",
+      "review": {
+        "rating": 4,
+        "comment": "Бургер теплий. Пакет трохи пом'явся."
+      }
+    },
+    {
+      "key": "order-04",
+      "restaurant": "dominos",
+      "customer": "customer-04",
+      "date": "2026-10-04 15:15:00",
+      "status": "доставлено",
+      "note": "Зателефонуйте перед доставкою.",
+      "items": [
+        {
+          "dish": "Піца Шинка та гриби",
+          "quantity": 1
+        },
+        {
+          "dish": "Піца Мангеттен",
+          "quantity": 1
+        }
+      ],
+      "courier": "courier-04",
+      "payment": "готівка",
+      "review": {
+        "rating": 5,
+        "comment": "Піца гаряча, коробки цілі."
+      }
+    },
+    {
+      "key": "order-05",
+      "restaurant": "puzata",
+      "customer": "customer-05",
+      "date": "2026-10-05 16:15:00",
+      "status": "доставлено",
+      "note": "Без одноразових приборів.",
+      "items": [
+        {
+          "dish": "Бульйон курячий з перепелиним яйцем",
+          "quantity": 1
+        },
+        {
+          "dish": "Борщ по-домашньому з м'ясом",
+          "quantity": 1
+        }
+      ],
+      "courier": "courier-05",
+      "payment": "картка",
+      "review": {
+        "rating": 4,
+        "comment": "Страви приїхали теплими, але кур'єр затримався."
+      }
+    },
+    {
+      "key": "order-06",
+      "restaurant": "lviv",
+      "customer": "customer-06",
+      "date": "2026-10-06 17:15:00",
+      "status": "доставлено",
+      "note": "Залиште замовлення біля входу.",
+      "items": [
+        {
+          "dish": "Круасан з лососем та авокадо",
+          "quantity": 2
+        },
+        {
+          "dish": "Круасан з індичкою по-італійськи",
+          "quantity": 1
+        }
+      ],
+      "courier": "courier-06",
+      "payment": "готівка",
+      "review": {
+        "rating": 4,
+        "comment": "Начинки достатньо. Один круасан трохи охолов."
+      }
+    },
+    {
+      "key": "order-07",
+      "restaurant": "il-molino-podil",
+      "customer": "customer-07",
+      "date": "2026-10-07 12:15:00",
+      "status": "доставлено",
+      "note": "Зателефонуйте перед доставкою.",
+      "items": [
+        {
+          "dish": "Піца Мюнхенська",
+          "quantity": 1
+        },
+        {
+          "dish": "Піца Мюнхенська з чері",
+          "quantity": 1
+        }
+      ],
+      "courier": "courier-01",
+      "payment": "картка",
+      "review": {
+        "rating": 4,
+        "comment": "Піца сподобалась. Доставили на десять хвилин пізніше."
+      }
+    },
+    {
+      "key": "order-08",
+      "restaurant": "pesto-lobanovskoho",
+      "customer": "customer-08",
+      "date": "2026-10-08 13:15:00",
+      "status": "доставлено",
+      "note": "",
+      "items": [
+        {
+          "dish": "Тірамісу",
+          "quantity": 1
+        },
+        {
+          "dish": "Ванільні сирники",
+          "quantity": 1
+        }
+      ],
+      "courier": "courier-02",
+      "payment": "готівка",
+      "review": {
+        "rating": 4,
+        "comment": "Десерти цілі, коробки сухі."
+      }
+    },
+    {
+      "key": "order-09",
+      "restaurant": "musafir-khmelnytskoho",
+      "customer": "customer-09",
+      "date": "2026-10-09 14:15:00",
+      "status": "доставлено",
+      "note": "Залиште замовлення біля входу.",
+      "items": [
+        {
+          "dish": "Янтик з яловичиною 1шт",
+          "quantity": 2
+        },
+        {
+          "dish": "Янтик з бараниною 1шт",
+          "quantity": 1
+        }
+      ],
+      "courier": "courier-03",
+      "payment": "картка",
+      "review": {
+        "rating": 5,
+        "comment": "Усе гаряче, замовлення повне."
+      }
+    },
+    {
+      "key": "order-10",
+      "restaurant": "greek",
+      "customer": "customer-10",
+      "date": "2026-10-10 15:15:00",
+      "status": "доставлено",
+      "note": "Зателефонуйте перед доставкою.",
+      "items": [
+        {
+          "dish": "Гірос Класичний",
+          "quantity": 1
+        },
+        {
+          "dish": "Гірос із телятиною",
+          "quantity": 1
+        }
+      ],
+      "courier": "courier-04",
+      "payment": "готівка",
+      "review": {
+        "rating": 5,
+        "comment": "Порції великі, пакування не протекло."
+      }
+    },
+    {
+      "key": "order-11",
+      "restaurant": "kfc",
+      "customer": "customer-11",
+      "date": "2026-10-11 16:15:00",
+      "status": "доставлено",
+      "note": "Без одноразових приборів.",
+      "items": [
+        {
+          "dish": "Шефбургер оригінальний NEW",
+          "quantity": 1
+        },
+        {
+          "dish": "Соло бакет оригінальний",
+          "quantity": 1
+        }
+      ],
+      "courier": "courier-05",
+      "payment": "картка",
+      "review": {
+        "rating": 5,
+        "comment": "Курка хрустка, замовлення без помилок."
+      }
+    },
+    {
+      "key": "order-12",
+      "restaurant": "dominos",
+      "customer": "customer-12",
+      "date": "2026-10-12 17:15:00",
+      "status": "доставлено",
+      "note": "Залиште замовлення біля входу.",
+      "items": [
+        {
+          "dish": "Піца Шинка та гриби",
+          "quantity": 2
+        },
+        {
+          "dish": "Піца Мангеттен",
+          "quantity": 1
+        }
+      ],
+      "courier": "courier-06",
+      "payment": "готівка",
+      "review": {
+        "rating": 4,
+        "comment": "Начинка добра, тісто трохи охололо в дорозі."
+      }
+    },
+    {
+      "key": "order-13",
+      "restaurant": "puzata",
+      "customer": "customer-01",
+      "date": "2026-10-13 12:15:00",
+      "status": "доставлено",
+      "note": "Зателефонуйте перед доставкою.",
+      "items": [
+        {
+          "dish": "Бульйон курячий з перепелиним яйцем",
+          "quantity": 1
+        },
+        {
+          "dish": "Борщ по-домашньому з м'ясом",
+          "quantity": 1
+        }
+      ],
+      "courier": "courier-01",
+      "payment": "картка",
+      "review": {
+        "rating": 3,
+        "comment": "Пакування ціле, але страви вже ледь теплі."
+      }
+    },
+    {
+      "key": "order-14",
+      "restaurant": "lviv",
+      "customer": "customer-02",
+      "date": "2026-10-14 13:15:00",
+      "status": "доставлено",
+      "note": "Без одноразових приборів.",
+      "items": [
+        {
+          "dish": "Круасан з лососем та авокадо",
+          "quantity": 1
+        },
+        {
+          "dish": "Круасан з індичкою по-італійськи",
+          "quantity": 1
+        }
+      ],
+      "courier": "courier-02",
+      "payment": "готівка",
+      "review": {
+        "rating": 5,
+        "comment": "Круасани свіжі, начинка не випала."
+      }
+    },
+    {
+      "key": "order-15",
+      "restaurant": "il-molino-podil",
+      "customer": "customer-03",
+      "date": "2026-10-15 14:15:00",
+      "status": "доставлено",
+      "note": "Залиште замовлення біля входу.",
+      "items": [
+        {
+          "dish": "Піца Мюнхенська",
+          "quantity": 2
+        },
+        {
+          "dish": "Піца Мюнхенська з чері",
+          "quantity": 1
+        }
+      ],
+      "courier": "courier-03",
+      "payment": "картка",
+      "review": {
+        "rating": 4,
+        "comment": "Піца смачна, хотілося б швидшу доставку."
+      }
+    },
+    {
+      "key": "order-16",
+      "restaurant": "musafir-khmelnytskoho",
+      "customer": "customer-01",
+      "date": "2026-10-18 23:59:59",
+      "status": "доставлено",
+      "note": "",
+      "items": [
+        {
+          "dish": "Янтик з яловичиною 1шт",
+          "quantity": 2,
+          "unit_price": "149.00"
+        },
+        {
+          "dish": "Янтик з бараниною 1шт",
+          "quantity": 1
+        }
+      ],
+      "courier": "courier-04",
+      "payment": "готівка",
+      "review": {
+        "rating": 5,
+        "comment": "Доставили вчасно, замовлення повне."
+      }
+    },
+    {
+      "key": "order-17",
+      "restaurant": "greek",
+      "customer": "customer-04",
+      "date": "2026-10-19 00:00:00",
+      "status": "доставлено",
+      "note": "Без одноразових приборів.",
+      "items": [
+        {
+          "dish": "Гірос Класичний",
+          "quantity": 1
+        },
+        {
+          "dish": "Гірос із телятиною",
+          "quantity": 1
+        }
+      ],
+      "courier": "courier-05",
+      "payment": "картка"
+    },
+    {
+      "key": "order-18",
+      "restaurant": "kfc",
+      "customer": "customer-05",
+      "date": "2026-10-20 16:30:00",
+      "status": "доставлено",
+      "note": "Залиште замовлення біля входу.",
+      "items": [
+        {
+          "dish": "Шефбургер оригінальний NEW",
+          "quantity": 2
+        },
+        {
+          "dish": "Соло бакет оригінальний",
+          "quantity": 1
+        }
+      ],
+      "courier": "courier-06",
+      "payment": "готівка"
+    },
+    {
+      "key": "order-19",
+      "restaurant": "dominos",
+      "customer": "customer-06",
+      "date": "2026-10-21 16:30:00",
+      "status": "доставлено",
+      "note": "Зателефонуйте перед доставкою.",
+      "items": [
+        {
+          "dish": "Піца Шинка та гриби",
+          "quantity": 1
+        },
+        {
+          "dish": "Піца Мангеттен",
+          "quantity": 1
+        }
+      ],
+      "courier": "courier-01",
+      "payment": "картка"
+    },
+    {
+      "key": "order-20",
+      "restaurant": "musafir-khmelnytskoho",
+      "customer": "customer-07",
+      "date": "2026-10-23 16:30:00",
+      "status": "доставлено",
+      "note": "Без одноразових приборів.",
+      "items": [
+        {
+          "dish": "Янтик з яловичиною 1шт",
+          "quantity": 1
+        },
+        {
+          "dish": "Янтик з бараниною 1шт",
+          "quantity": 1
+        }
+      ],
+      "courier": "courier-02",
+      "payment": "готівка"
+    },
+    {
+      "key": "order-21",
+      "restaurant": "musafir-khmelnytskoho",
+      "customer": "customer-01",
+      "date": "2026-10-24 10:27:00",
+      "status": "створено",
+      "note": "Залиште замовлення біля входу.",
+      "items": [
+        {
+          "dish": "Янтик з яловичиною 1шт",
+          "quantity": 2
+        }
+      ]
+    },
+    {
+      "key": "order-22",
+      "restaurant": "salateira",
+      "customer": "customer-11",
+      "date": "2026-10-24 11:34:00",
+      "status": "створено",
+      "note": "Зателефонуйте перед доставкою.",
+      "items": [
+        {
+          "dish": "Салат Цезар DLX",
+          "quantity": 1
+        },
+        {
+          "dish": "Салат Цезар",
+          "quantity": 1
+        },
+        {
+          "dish": "Салат Маріно",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "key": "order-23",
+      "restaurant": "pesto-lobanovskoho",
+      "customer": "customer-12",
+      "date": "2026-10-24 12:41:00",
+      "status": "створено",
+      "note": "Без одноразових приборів.",
+      "items": [
+        {
+          "dish": "Тірамісу",
+          "quantity": 1
+        },
+        {
+          "dish": "Ванільні сирники",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "key": "order-24",
+      "restaurant": "greek",
+      "customer": "customer-05",
+      "date": "2026-10-24 13:48:00",
+      "status": "готується",
+      "note": "",
+      "items": [
+        {
+          "dish": "Гірос Класичний",
+          "quantity": 2
+        },
+        {
+          "dish": "Гірос із телятиною",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "key": "order-25",
+      "restaurant": "kfc",
+      "customer": "customer-07",
+      "date": "2026-10-24 14:55:00",
+      "status": "готується",
+      "note": "Зателефонуйте перед доставкою.",
+      "items": [
+        {
+          "dish": "Шефбургер оригінальний NEW",
+          "quantity": 1
+        },
+        {
+          "dish": "Соло бакет оригінальний",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "key": "order-26",
+      "restaurant": "lviv",
+      "customer": "customer-08",
+      "date": "2026-10-24 15:02:00",
+      "status": "готується",
+      "note": "Без одноразових приборів.",
+      "items": [
+        {
+          "dish": "Круасан з лососем та авокадо",
+          "quantity": 1
+        },
+        {
+          "dish": "Круасан з індичкою по-італійськи",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "key": "order-27",
+      "restaurant": "dominos",
+      "customer": "customer-09",
+      "date": "2026-10-24 16:09:00",
+      "status": "в дорозі",
+      "note": "Залиште замовлення біля входу.",
+      "items": [
+        {
+          "dish": "Піца Шинка та гриби",
+          "quantity": 2
+        },
+        {
+          "dish": "Піца Мангеттен",
+          "quantity": 1
+        }
+      ],
+      "courier": "courier-09"
+    },
+    {
+      "key": "order-28",
+      "restaurant": "puzata",
+      "customer": "customer-10",
+      "date": "2026-10-24 17:16:00",
+      "status": "в дорозі",
+      "note": "Зателефонуйте перед доставкою.",
+      "items": [
+        {
+          "dish": "Бульйон курячий з перепелиним яйцем",
+          "quantity": 1
+        },
+        {
+          "dish": "Борщ по-домашньому з м'ясом",
+          "quantity": 1
+        }
+      ],
+      "courier": "courier-10"
+    },
+    {
+      "key": "order-29",
+      "restaurant": "musafir-khmelnytskoho",
+      "customer": "customer-03",
+      "date": "2026-10-24 18:23:00",
+      "status": "скасовано",
+      "note": "Без одноразових приборів.",
+      "items": [
+        {
+          "dish": "Янтик з яловичиною 1шт",
+          "quantity": 8
+        },
+        {
+          "dish": "Янтик з бараниною 1шт",
+          "quantity": 1
+        }
+      ]
+    },
+    {
+      "key": "order-30",
+      "restaurant": "salateira",
+      "customer": "customer-11",
+      "date": "2026-10-24 10:30:00",
+      "status": "скасовано",
+      "note": "Залиште замовлення біля входу.",
+      "items": [
+        {
+          "dish": "Салат Цезар DLX",
+          "quantity": 2
+        },
+        {
+          "dish": "Салат Цезар",
+          "quantity": 1
+        }
+      ],
+      "courier": "courier-08",
+      "cancel_after_dispatch": true
+    }
+  ]
+}

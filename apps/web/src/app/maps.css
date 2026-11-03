@@ -1,0 +1,600 @@
+:root {
+  --map-courier: #3268a0;
+}
+.map-surface {
+  position: relative;
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--background);
+}
+.map-canvas {
+  width: 100%;
+  height: 420px;
+  isolation: isolate;
+  z-index: 0;
+  font-family: inherit;
+}
+.map-canvas:focus-visible {
+  outline-offset: -4px;
+}
+.map-canvas .leaflet-control-zoom a {
+  width: 44px;
+  height: 44px;
+  line-height: 44px;
+  color: var(--ink);
+  text-decoration: none;
+}
+.map-marker > span {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  background: var(--primary);
+  color: var(--surface);
+  border: 2px solid var(--surface);
+  border-radius: 50% 50% 50% 4px;
+  transform: rotate(-45deg);
+  box-shadow: 0 2px 6px #20243730;
+}
+.map-marker svg {
+  width: 23px;
+  height: 23px;
+  transform: rotate(45deg);
+}
+.map-marker-destination > span {
+  background: var(--success);
+}
+.map-marker-courier > span {
+  background: var(--map-courier);
+}
+.map-marker.is-muted > span {
+  background: var(--muted);
+}
+.map-marker.is-selected > span {
+  box-shadow:
+    0 0 0 4px var(--surface),
+    0 3px 10px #20243750;
+}
+.map-loading {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: var(--background);
+  color: var(--muted);
+  pointer-events: none;
+}
+.map-error {
+  position: absolute;
+  bottom: 2rem;
+  inset-inline: 0.75rem;
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--control-radius);
+  font-size: 0.8125rem;
+}
+.map-error button {
+  min-height: 40px;
+  padding: 0.4rem 0.7rem;
+}
+.address-field {
+  margin-bottom: 1.25rem;
+}
+.address-field > .field {
+  margin-bottom: 0.5rem;
+}
+.address-map-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+}
+.address-map-actions button {
+  font-size: 0.875rem;
+}
+.address-map-actions button span {
+  margin-right: 0.3rem;
+}
+.address-point-saved {
+  font-size: 0.75rem;
+  color: var(--success);
+}
+.location-picker .map-canvas {
+  height: 260px;
+}
+.location-search-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin: 0.75rem 0 0.5rem;
+}
+.location-search {
+  display: flex;
+  gap: 0.75rem;
+}
+.location-search-input {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+}
+.location-search-input input {
+  padding-right: 2.5rem;
+}
+.location-search-input > button {
+  position: absolute;
+  right: 0.3rem;
+  top: 0.25rem;
+  min-width: 36px;
+  font-size: 1.4rem;
+}
+.location-geolocate {
+  margin-block: 0.35rem 0.75rem;
+}
+.location-results {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 1rem;
+  max-height: 240px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--control-radius);
+}
+.location-results li + li {
+  border-top: 1px solid var(--border);
+}
+.location-results button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  text-align: left;
+  border: 0;
+  border-radius: 0;
+  font-size: 0.875rem;
+}
+.location-results button span {
+  color: var(--primary);
+}
+.location-map-help {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  margin-block: 0.75rem;
+}
+.location-map-help p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+.location-map-help button {
+  flex-shrink: 0;
+  font-size: 0.8125rem;
+}
+.location-picker-error {
+  color: var(--danger);
+  min-height: 1.5em;
+  margin-block: 0.5rem;
+  font-size: 0.8125rem;
+}
+.location-picker-footer {
+  position: sticky;
+  bottom: 0;
+  background: var(--surface);
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+  z-index: 1;
+}
+.location-picker-footer small {
+  display: block;
+  color: var(--muted);
+  margin-bottom: 0.75rem;
+}
+.location-picker-footer .actions {
+  justify-content: flex-end;
+}
+.catalog-view-switch {
+  display: flex;
+  gap: 0.25rem;
+  flex-shrink: 0;
+  border: 1px solid var(--home-line);
+  border-radius: var(--control-radius);
+  padding: 0.25rem;
+  background: var(--surface);
+}
+.catalog-view-switch button {
+  border: 0;
+  min-height: 40px;
+  padding: 0.5rem 1rem;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.875rem;
+}
+.catalog-view-switch button[aria-pressed="true"] {
+  background: var(--home-soft);
+  color: var(--ink);
+  font-weight: 600;
+}
+.is-map-view .shop-page-heading {
+  margin-bottom: 1.25rem;
+}
+.is-map-view .shop-catalog-search {
+  margin-block: 1.25rem 1rem;
+}
+.is-map-view .shop-cuisine-filter {
+  margin-bottom: 1rem;
+}
+.restaurant-map-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 310px;
+  gap: 1.25rem;
+  align-items: start;
+}
+.restaurant-map-main {
+  min-width: 0;
+}
+.restaurant-map-main .map-canvas {
+  height: 460px;
+}
+.restaurant-map-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+.restaurant-map-bar p {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+.restaurant-map-bar strong {
+  color: var(--ink);
+}
+.restaurant-map-bar button {
+  min-height: 40px;
+  font-size: 0.8125rem;
+}
+.restaurant-map-list {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  overflow: hidden;
+}
+.restaurant-map-list h2 {
+  margin: 0;
+  padding: 1rem;
+  font-size: 1rem;
+}
+.restaurant-map-list ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 590px;
+  overflow-y: auto;
+}
+.restaurant-map-list li {
+  border-top: 1px solid var(--border);
+}
+.restaurant-map-list button {
+  display: flex;
+  gap: 0.8rem;
+  width: 100%;
+  border: 0;
+  border-radius: 0;
+  padding: 1rem;
+  text-align: left;
+}
+.restaurant-map-list button[aria-pressed="true"] {
+  background: var(--home-soft);
+  box-shadow: inset 3px 0 var(--primary);
+}
+.restaurant-map-list .catalog-photo {
+  width: 60px;
+  height: 60px;
+  flex-shrink: 0;
+  border-radius: var(--control-radius);
+}
+.restaurant-map-list button > span {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+}
+.restaurant-map-list strong {
+  font-size: 0.875rem;
+}
+.restaurant-map-list button span span,
+.restaurant-map-list small {
+  font-size: 0.75rem;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.map-restaurant-detail {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: 1.25rem;
+  margin-top: 1rem;
+}
+.map-restaurant-detail h2 {
+  margin: 0 0 0.35rem;
+  font-size: 1.25rem;
+}
+.map-restaurant-detail p {
+  margin: 0.3rem 0;
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+.map-menu-link,
+.map-secondary-link {
+  display: inline-flex;
+  min-height: var(--control-height);
+  align-items: center;
+  justify-content: center;
+  padding: 0.65rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--control-radius);
+  background: var(--surface);
+}
+.map-menu-link {
+  color: var(--surface);
+  border-color: var(--primary);
+  background: var(--primary);
+}
+.map-menu-link:hover,
+.map-secondary-link:hover {
+  text-decoration: none;
+  box-shadow: inset 0 0 0 1px currentColor;
+}
+.delivery-tracking {
+  margin-block: 1.5rem;
+  padding: 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  min-width: 0;
+}
+.delivery-map-heading,
+.courier-recipient {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.delivery-map-heading h2,
+.courier-recipient h2 {
+  margin: 0.25rem 0 0;
+  font-size: 1.35rem;
+  letter-spacing: -0.03em;
+}
+.delivery-eyebrow {
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+.delivery-map-heading button {
+  font-size: 0.8125rem;
+  flex-shrink: 0;
+}
+.delivery-map-legend {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-block: 0.75rem;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+.delivery-map-legend span {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+}
+.map-dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+.map-dot.restaurant {
+  background: var(--primary);
+}
+.map-dot.destination {
+  background: var(--success);
+}
+.map-dot.courier {
+  background: var(--map-courier);
+}
+.delivery-route-summary p {
+  margin: 0.5rem 0;
+  color: var(--muted);
+  font-size: 0.8125rem;
+}
+.delivery-route-summary strong {
+  color: var(--ink);
+}
+.delivery-contact-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.5rem;
+  margin-top: 1.25rem;
+  border-top: 1px solid var(--border);
+  padding-top: 1.25rem;
+}
+.delivery-contact-value {
+  margin: 0.4rem 0 0.75rem;
+  font-size: 1rem;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.delivery-contact-grid button,
+.delivery-contact-grid a {
+  font-size: 0.8125rem;
+}
+.delivery-navigation,
+.delivery-courier-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin-top: 0.75rem;
+  font-size: 0.8125rem;
+}
+.courier-position-controls {
+  border-top: 1px solid var(--border);
+  margin-top: 1rem;
+  padding-top: 1rem;
+}
+.courier-position-controls h3 {
+  font-size: 1rem;
+  margin: 0 0 0.75rem;
+}
+.courier-position-controls > button {
+  margin-right: 0.75rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.8125rem;
+}
+.delivery-chat {
+  margin-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+.delivery-chat > summary {
+  padding: 1rem 0;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9375rem;
+}
+.delivery-chat > summary:hover {
+  color: var(--primary);
+}
+.delivery-message-list {
+  min-height: 7rem;
+  max-height: 22rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  background: var(--background);
+  padding: 1rem;
+  border-radius: var(--control-radius);
+  margin-bottom: 1rem;
+}
+.chat-empty {
+  margin: auto;
+  color: var(--muted);
+  font-size: 0.8125rem;
+}
+.delivery-message {
+  max-width: 88%;
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--control-radius);
+  background: var(--surface);
+  align-self: flex-start;
+}
+.delivery-message.from-customer {
+  align-self: flex-end;
+  background: var(--home-soft);
+}
+.delivery-message > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+}
+.delivery-message time {
+  color: var(--muted);
+}
+.delivery-message p {
+  margin: 0.5rem 0 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font-size: 0.875rem;
+}
+.message-composer .field textarea {
+  min-height: 80px;
+}
+.inline-alert {
+  margin-bottom: 1rem;
+  padding-block: 0.5rem;
+  color: var(--danger);
+  font-size: 0.875rem;
+}
+.courier-recipient p {
+  margin-bottom: 0;
+  color: var(--muted);
+}
+@media (max-width: 980px) {
+  .restaurant-map-layout {
+    grid-template-columns: minmax(0, 1fr) 270px;
+  }
+  .restaurant-map-list button {
+    padding: 0.75rem;
+  }
+}
+@media (max-width: 700px) {
+  .restaurant-map-layout,
+  .delivery-contact-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .restaurant-map-main .map-canvas {
+    height: 380px;
+  }
+  .restaurant-map-list ul {
+    max-height: 380px;
+  }
+  .location-picker .map-canvas {
+    height: 240px;
+  }
+  .delivery-tracking {
+    padding: 1rem;
+  }
+  .delivery-tracking .map-canvas {
+    height: 330px;
+  }
+  .delivery-map-heading,
+  .courier-recipient,
+  .location-map-help {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .delivery-map-heading h2 {
+    font-size: 1.25rem;
+  }
+  .location-search {
+    gap: 0.5rem;
+  }
+  .location-picker .location-search > button.primary {
+    min-width: 0;
+    flex-shrink: 0;
+  }
+  .is-map-view .shop-cuisine-filter {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+  }
+  .is-map-view .shop-cuisine-filter > button {
+    flex-shrink: 0;
+    padding-inline: 0.75rem;
+  }
+  .location-picker-footer .actions {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.3fr);
+    gap: 0.5rem;
+  }
+  .location-picker-footer .actions > button {
+    min-width: 0;
+    font-size: 0.8125rem;
+  }
+}

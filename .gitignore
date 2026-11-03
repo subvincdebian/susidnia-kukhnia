@@ -1,0 +1,15 @@
+node_modules/
+.local/
+.env
+.env.*
+!.env.example
+apps/*/dist/
+apps/backend/src/generated/
+*.tsbuildinfo
+apps/web/public/demo/
+coverage/
+work/
+*.log
+premium-audit.json
+.DS_Store
+Thumbs.db

@@ -1,0 +1,1071 @@
+{
+  "columns": [
+    {
+      "table_name": "couriers",
+      "column_name": "id",
+      "ordinal_position": 1,
+      "column_default": "nextval('couriers_id_seq'::regclass)",
+      "is_nullable": "NO",
+      "data_type": "integer",
+      "character_maximum_length": null,
+      "numeric_precision": 32,
+      "numeric_scale": 0,
+      "datetime_precision": null,
+      "is_identity": "NO",
+      "identity_generation": null
+    },
+    {
+      "table_name": "couriers",
+      "column_name": "full_name",
+      "ordinal_position": 2,
+      "column_default": null,
+      "is_nullable": "NO",
+      "data_type": "character varying",
+      "character_maximum_length": 100,
+      "numeric_precision": null,
+      "numeric_scale": null,
+      "datetime_precision": null,
+      "is_identity": "NO",
+      "identity_generation": null
+    },
+    {
+      "table_name": "couriers",
+      "column_name": "phone",
+      "ordinal_position": 3,
+      "column_default": null,
+      "is_nullable": "NO",
+      "data_type": "character varying",
+      "character_maximum_length": 20,
+      "numeric_precision": null,
+      "numeric_scale": null,
+      "datetime_precision": null,
+      "is_identity": "NO",
+      "identity_generation": null
+    },
+    {
+      "table_name": "couriers",
+      "column_name": "vehicle_type",
+      "ordinal_position": 4,
+      "column_default": null,
+      "is_nullable": "NO",
+      "data_type": "character varying",
+      "character_maximum_length": 30,
+      "numeric_precision": null,
+      "numeric_scale": null,
+      "datetime_precision": null,
+      "is_identity": "NO",
+      "identity_generation": null
+    },
+    {
+      "table_name": "couriers",
+      "column_name": "is_available",
+      "ordinal_position": 5,
+      "column_default": "true",
+      "is_nullable": "NO",
+      "data_type": "boolean",
+      "character_maximum_length": null,
+      "numeric_precision": null,
+      "numeric_scale": null,
+      "datetime_precision": null,
+      "is_identity": "NO",
+      "identity_generation": null
+    },
+    {
+      "table_name": "customers",
+      "column_name": "id",
+      "ordinal_position": 1,
+      "column_default": "nextval('customers_id_seq'::regclass)",
+      "is_nullable": "NO",
+      "data_type": "integer",
+      "character_maximum_length": null,
+      "numeric_precision": 32,
+      "numeric_scale": 0,
+      "datetime_precision": null,
+      "is_identity": "NO",
+      "identity_generation": null
+    },
+    {
+      "table_name": "customers",
+      "column_name": "full_name",
+      "ordinal_position": 2,
+      "column_default": null,
+      "is_nullable": "NO",
+      "data_type": "character varying",
+      "character_maximum_length": 100,
+      "numeric_precision": null,
+      "numeric_scale": null,
+      "datetime_precision": null,
+      "is_identity": "NO",
+      "identity_generation": null
+    },
+    {
+      "table_name": "customers",
+      "column_name": "email",
+      "ordinal_position": 3,
+      "column_default": null,
+      "is_nullable": "NO",
+      "data_type": "character varying",
+      "character_maximum_length": 100,
+      "numeric_precision": null,
+      "numeric_scale": null,
+      "datetime_precision": null,
+      "is_identity": "NO",
+      "identity_generation": null
+    },
+    {
+      "table_name": "customers",
+      "column_name": "phone",
+      "ordinal_position": 4,
+      "column_default": null,
+      "is_nullable": "NO",
+      "data_type": "character varying",
+      "character_maximum_length": 20,
+      "numeric_precision": null,
+      "numeric_scale": null,
+      "datetime_precision": null,
+      "is_identity": "NO",
+      "identity_generation": null
+    },
+    {
+      "table_name": "customers",
+      "column_name": "default_delivery_address",
+      "ordinal_position": 5,
+      "column_default": null,
+      "is_nullable": "NO",
+      "data_type": "character varying",
+      "character_maximum_length": 200,
+      "numeric_precision": null,
+      "numeric_scale": null,
+      "datetime_precision": null,
+      "is_identity": "NO",
+      "identity_generation": null
+    },
+    {
+      "table_name": "customers",
+      "column_name": "created_at",
+      "ordinal_position": 6,
+      "column_default": "CURRENT_TIMESTAMP",
+      "is_nullable": "NO",
+      "data_type": "timestamp without time zone",
+      "character_maximum_length": null,
+      "numeric_precision": null,
+      "numeric_scale": null,
+      "datetime_precision": 6,
+      "is_identity": "NO",
+      "identity_generation": null
+    },
+    {
+      "table_name": "menu_items",
+      "column_name": "id",
+      "ordinal_position": 1,
+      "column_default": "nextval('menu_items_id_seq'::regclass)",
+      "is_nullable": "NO",
+      "data_type": "integer",
+      "character_maximum_length": null,
+      "numeric_precision": 32,
+      "numeric_scale": 0,
+      "datetime_precision": null,
+      "is_identity": "NO",
+      "identity_generation": null
+    },
+    {
+      "table_name": "menu_items",
+      "column_name": "restaurant_id",
+      "ordinal_position": 2,
+      "column_default": null,
+      "is_nullable": "NO",
+      "data_type": "integer",
+      "character_maximum_length": null,
+      "numeric_precision": 32,
+      "numeric_scale": 0,
+      "datetime_precision": null,
+      "is_identity": "NO",
+      "identity_generation": null
+    },
+    {
+      "table_name": "menu_items",
+      "column_name": "name",
+      "ordinal_position": 3,
+      "column_default": null,
+      "is_nullable": "NO",
+      "data_type": "character varying",
+      "character_maximum_length": 100,
+      "numeric_precision": null,
+      "numeric_scale": null,
+      "datetime_precision": null,
+      "is_identity": "NO",
+      "identity_generation": null
+    },
+    {
+      "table_name": "menu_items",
+      "column_name": "description",
+      "ordinal_position": 4,
+      "column_default": null,
+      "is_nullable": "YES",
+      "data_type": "text",
+      "character_maximum_length": null,
+      "numeric_precision": null,
+      "numeric_scale": null,
+      "datetime_precision": null,
+      "is_identity": "NO",
+      "identity_generation": null
+    },
+    {
+      "table_name": "menu_items",
+      "column_name": "price",
+      "ordinal_position": 5,
+      "column_default": null,
+      "is_nullable": "NO",
+      "data_type": "numeric",
+      "character_maximum_length": null,
+      "numeric_precision": 10,
+      "numeric_scale": 2,
+      "datetime_precision": null,
+      "is_identity": "NO",
+      "identity_generation": null
+    },
+    {
+      "table_name": "menu_items",
+      "column_name": "category",
+      "ordinal_position": 6,
+      "column_default": null,
+      "is_nullable": "NO",
+      "data_type": "character varying",
+      "character_maximum_length": 50,
+      "numeric_precision": null,
+      "numeric_scale": null,
+      "datetime_precision": null,
+      "is_identity": "NO",
+      "identity_generation": null
+    },
+    {
+      "table_name": "menu_items",
+      "column_name": "is_available",
+      "ordinal_position": 7,
+      "column_default": "true",
+      "is_nullable": "NO",
+      "data_type": "boolean",
+      "character_maximum_length": null,
+      "numeric_precision": null,
+      "numeric_scale": null,
+      "datetime_precision": null,
+      "is_identity": "NO",
+      "identity_generation": null
+    },
+    {
+      "table_name": "order_items",
+      "column_name": "id",
+      "ordinal_position": 1,
+      "column_default": "nextval('order_items_id_seq'::regclass)",
+      "is_nullable": "NO",
+      "data_type": "integer",
+      "character_maximum_length": null,
+      "numeric_precision": 32,
+      "numeric_scale": 0,
+      "datetime_precision": null,
+      "is_identity": "NO",
+      "identity_generation": null
+    },
+    {
+      "table_name": "order_items",
+      "column_name": "order_id",
+      "ordinal_position": 2,
+      "column_default": null,
+      "is_nullable": "NO",
+      "data_type": "integer",
+      "character_maximum_length": null,
+      "numeric_precision": 32,
+      "numeric_scale": 0,
+      "datetime_precision": null,
+      "is_identity": "NO",
+      "identity_generation": null
+    },
+    {
+      "table_name": "order_items",
+      "column_name": "menu_item_id",
+      "ordinal_position": 3,
+      "column_default": null,
+      "is_nullable": "NO",
+      "data_type": "integer",
+      "character_maximum_length": null,
+      "numeric_precision": 32,
+      "numeric_scale": 0,
+      "datetime_precision": null,
+      "is_identity": "NO",
+      "identity_generation": null
+    },
+    {
+      "table_name": "order_items",
+      "column_name": "quantity",
+      "ordinal_position": 4,
+      "column_default": "1",
+      "is_nullable": "NO",
+      "data_type": "integer",
+      "character_maximum_length": null,
+      "numeric_precision": 32,
+      "numeric_scale": 0,
+      "datetime_precision": null,
+      "is_identity": "NO",
+      "identity_generation": null
+    },
+    {
+      "table_name": "order_items",
+      "column_name": "unit_price",
+      "ordinal_position": 5,
+      "column_default": null,
+      "is_nullable": "NO",
+      "data_type": "numeric",
+      "character_maximum_length": null,
+      "numeric_precision": 10,
+      "numeric_scale": 2,
+      "datetime_precision": null,
+      "is_identity": "NO",
+      "identity_generation": null
+    },
+    {
+      "table_name": "orders",
+      "column_name": "id",
+      "ordinal_position": 1,
+      "column_default": "nextval('orders_id_seq'::regclass)",
+      "is_nullable": "NO",
+      "data_type": "integer",
+      "character_maximum_length": null,
+      "numeric_precision": 32,
+      "numeric_scale": 0,
+      "datetime_precision": null,
+      "is_identity": "NO",
+      "identity_generation": null
+    },
+    {
+      "table_name": "orders",
+      "column_name": "customer_id",
+      "ordinal_position": 2,
+      "column_default": null,
+      "is_nullable": "NO",
+      "data_type": "integer",
+      "character_maximum_length": null,
+      "numeric_precision": 32,
+      "numeric_scale": 0,
+      "datetime_precision": null,
+      "is_identity": "NO",
+      "identity_generation": null
+    },
+    {
+      "table_name": "orders",
+      "column_name": "restaurant_id",
+      "ordinal_position": 3,
+      "column_default": null,
+      "is_nullable": "NO",
+      "data_type": "integer",
+      "character_maximum_length": null,
+      "numeric_precision": 32,
+      "numeric_scale": 0,
+      "datetime_precision": null,
+      "is_identity": "NO",
+      "identity_generation": null
+    },
+    {
+      "table_name": "orders",
+      "column_name": "courier_id",
+      "ordinal_position": 4,
+      "column_default": null,
+      "is_nullable": "YES",
+      "data_type": "integer",
+      "character_maximum_length": null,
+      "numeric_precision": 32,
+      "numeric_scale": 0,
+      "datetime_precision": null,
+      "is_identity": "NO",
+      "identity_generation": null
+    },
+    {
+      "table_name": "orders",
+      "column_name": "order_date",
+      "ordinal_position": 5,
+      "column_default": "CURRENT_TIMESTAMP",
+      "is_nullable": "NO",
+      "data_type": "timestamp without time zone",
+      "character_maximum_length": null,
+      "numeric_precision": null,
+      "numeric_scale": null,
+      "datetime_precision": 6,
+      "is_identity": "NO",
+      "identity_generation": null
+    },
+    {
+      "table_name": "orders",
+      "column_name": "delivery_address",
+      "ordinal_position": 6,
+      "column_default": null,
+      "is_nullable": "NO",
+      "data_type": "character varying",
+      "character_maximum_length": 200,
+      "numeric_precision": null,
+      "numeric_scale": null,
+      "datetime_precision": null,
+      "is_identity": "NO",
+      "identity_generation": null
+    },
+    {
+      "table_name": "orders",
+      "column_name": "total_amount",
+      "ordinal_position": 7,
+      "column_default": "0",
+      "is_nullable": "NO",
+      "data_type": "numeric",
+      "character_maximum_length": null,
+      "numeric_precision": 10,
+      "numeric_scale": 2,
+      "datetime_precision": null,
+      "is_identity": "NO",
+      "identity_generation": null
+    },
+    {
+      "table_name": "orders",
+      "column_name": "delivery_status",
+      "ordinal_position": 8,
+      "column_default": "'створено'::character varying",
+      "is_nullable": "NO",
+      "data_type": "character varying",
+      "character_maximum_length": 30,
+      "numeric_precision": null,
+      "numeric_scale": null,
+      "datetime_precision": null,
+      "is_identity": "NO",
+      "identity_generation": null
+    },
+    {
+      "table_name": "orders",
+      "column_name": "delivery_note",
+      "ordinal_position": 9,
+      "column_default": "''::text",
+      "is_nullable": "NO",
+      "data_type": "text",
+      "character_maximum_length": null,
+      "numeric_precision": null,
+      "numeric_scale": null,
+      "datetime_precision": null,
+      "is_identity": "NO",
+      "identity_generation": null
+    },
+    {
+      "table_name": "payments",
+      "column_name": "id",
+      "ordinal_position": 1,
+      "column_default": null,
+      "is_nullable": "NO",
+      "data_type": "integer",
+      "character_maximum_length": null,
+      "numeric_precision": 32,
+      "numeric_scale": 0,
+      "datetime_precision": null,
+      "is_identity": "YES",
+      "identity_generation": "BY DEFAULT"
+    },
+    {
+      "table_name": "payments",
+      "column_name": "order_id",
+      "ordinal_position": 2,
+      "column_default": null,
+      "is_nullable": "NO",
+      "data_type": "integer",
+      "character_maximum_length": null,
+      "numeric_precision": 32,
+      "numeric_scale": 0,
+      "datetime_precision": null,
+      "is_identity": "NO",
+      "identity_generation": null
+    },
+    {
+      "table_name": "payments",
+      "column_name": "amount",
+      "ordinal_position": 3,
+      "column_default": null,
+      "is_nullable": "NO",
+      "data_type": "numeric",
+      "character_maximum_length": null,
+      "numeric_precision": 10,
+      "numeric_scale": 2,
+      "datetime_precision": null,
+      "is_identity": "NO",
+      "identity_generation": null
+    },
+    {
+      "table_name": "payments",
+      "column_name": "method",
+      "ordinal_position": 4,
+      "column_default": null,
+      "is_nullable": "NO",
+      "data_type": "character varying",
+      "character_maximum_length": 20,
+      "numeric_precision": null,
+      "numeric_scale": null,
+      "datetime_precision": null,
+      "is_identity": "NO",
+      "identity_generation": null
+    },
+    {
+      "table_name": "payments",
+      "column_name": "paid_at",
+      "ordinal_position": 5,
+      "column_default": "CURRENT_TIMESTAMP",
+      "is_nullable": "NO",
+      "data_type": "timestamp without time zone",
+      "character_maximum_length": null,
+      "numeric_precision": null,
+      "numeric_scale": null,
+      "datetime_precision": 6,
+      "is_identity": "NO",
+      "identity_generation": null
+    },
+    {
+      "table_name": "restaurants",
+      "column_name": "id",
+      "ordinal_position": 1,
+      "column_default": "nextval('restaurants_id_seq'::regclass)",
+      "is_nullable": "NO",
+      "data_type": "integer",
+      "character_maximum_length": null,
+      "numeric_precision": 32,
+      "numeric_scale": 0,
+      "datetime_precision": null,
+      "is_identity": "NO",
+      "identity_generation": null
+    },
+    {
+      "table_name": "restaurants",
+      "column_name": "name",
+      "ordinal_position": 2,
+      "column_default": null,
+      "is_nullable": "NO",
+      "data_type": "character varying",
+      "character_maximum_length": 100,
+      "numeric_precision": null,
+      "numeric_scale": null,
+      "datetime_precision": null,
+      "is_identity": "NO",
+      "identity_generation": null
+    },
+    {
+      "table_name": "restaurants",
+      "column_name": "address",
+      "ordinal_position": 3,
+      "column_default": null,
+      "is_nullable": "NO",
+      "data_type": "character varying",
+      "character_maximum_length": 200,
+      "numeric_precision": null,
+      "numeric_scale": null,
+      "datetime_precision": null,
+      "is_identity": "NO",
+      "identity_generation": null
+    },
+    {
+      "table_name": "restaurants",
+      "column_name": "phone",
+      "ordinal_position": 4,
+      "column_default": null,
+      "is_nullable": "NO",
+      "data_type": "character varying",
+      "character_maximum_length": 20,
+      "numeric_precision": null,
+      "numeric_scale": null,
+      "datetime_precision": null,
+      "is_identity": "NO",
+      "identity_generation": null
+    },
+    {
+      "table_name": "restaurants",
+      "column_name": "cuisine_type",
+      "ordinal_position": 5,
+      "column_default": null,
+      "is_nullable": "NO",
+      "data_type": "character varying",
+      "character_maximum_length": 50,
+      "numeric_precision": null,
+      "numeric_scale": null,
+      "datetime_precision": null,
+      "is_identity": "NO",
+      "identity_generation": null
+    },
+    {
+      "table_name": "restaurants",
+      "column_name": "rating",
+      "ordinal_position": 6,
+      "column_default": "5.0",
+      "is_nullable": "NO",
+      "data_type": "numeric",
+      "character_maximum_length": null,
+      "numeric_precision": 3,
+      "numeric_scale": 2,
+      "datetime_precision": null,
+      "is_identity": "NO",
+      "identity_generation": null
+    },
+    {
+      "table_name": "restaurants",
+      "column_name": "is_active",
+      "ordinal_position": 7,
+      "column_default": "true",
+      "is_nullable": "NO",
+      "data_type": "boolean",
+      "character_maximum_length": null,
+      "numeric_precision": null,
+      "numeric_scale": null,
+      "datetime_precision": null,
+      "is_identity": "NO",
+      "identity_generation": null
+    },
+    {
+      "table_name": "restaurants",
+      "column_name": "created_at",
+      "ordinal_position": 8,
+      "column_default": "CURRENT_TIMESTAMP",
+      "is_nullable": "NO",
+      "data_type": "timestamp without time zone",
+      "character_maximum_length": null,
+      "numeric_precision": null,
+      "numeric_scale": null,
+      "datetime_precision": 6,
+      "is_identity": "NO",
+      "identity_generation": null
+    },
+    {
+      "table_name": "reviews",
+      "column_name": "id",
+      "ordinal_position": 1,
+      "column_default": null,
+      "is_nullable": "NO",
+      "data_type": "integer",
+      "character_maximum_length": null,
+      "numeric_precision": 32,
+      "numeric_scale": 0,
+      "datetime_precision": null,
+      "is_identity": "YES",
+      "identity_generation": "BY DEFAULT"
+    },
+    {
+      "table_name": "reviews",
+      "column_name": "order_id",
+      "ordinal_position": 2,
+      "column_default": null,
+      "is_nullable": "NO",
+      "data_type": "integer",
+      "character_maximum_length": null,
+      "numeric_precision": 32,
+      "numeric_scale": 0,
+      "datetime_precision": null,
+      "is_identity": "NO",
+      "identity_generation": null
+    },
+    {
+      "table_name": "reviews",
+      "column_name": "rating",
+      "ordinal_position": 3,
+      "column_default": null,
+      "is_nullable": "NO",
+      "data_type": "smallint",
+      "character_maximum_length": null,
+      "numeric_precision": 16,
+      "numeric_scale": 0,
+      "datetime_precision": null,
+      "is_identity": "NO",
+      "identity_generation": null
+    },
+    {
+      "table_name": "reviews",
+      "column_name": "comment",
+      "ordinal_position": 4,
+      "column_default": null,
+      "is_nullable": "NO",
+      "data_type": "text",
+      "character_maximum_length": null,
+      "numeric_precision": null,
+      "numeric_scale": null,
+      "datetime_precision": null,
+      "is_identity": "NO",
+      "identity_generation": null
+    },
+    {
+      "table_name": "reviews",
+      "column_name": "created_at",
+      "ordinal_position": 5,
+      "column_default": "CURRENT_TIMESTAMP",
+      "is_nullable": "NO",
+      "data_type": "timestamp without time zone",
+      "character_maximum_length": null,
+      "numeric_precision": null,
+      "numeric_scale": null,
+      "datetime_precision": 6,
+      "is_identity": "NO",
+      "identity_generation": null
+    }
+  ],
+  "constraints": [
+    {
+      "table_name": "couriers",
+      "conname": "couriers_phone_key",
+      "contype": "u",
+      "definition": "UNIQUE (phone)"
+    },
+    {
+      "table_name": "couriers",
+      "conname": "couriers_pkey",
+      "contype": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "couriers",
+      "conname": "couriers_vehicle_type_check",
+      "contype": "c",
+      "definition": "CHECK (((vehicle_type)::text = ANY ((ARRAY['пішки'::character varying, 'велосипед'::character varying, 'скутер'::character varying, 'автомобіль'::character varying])::text[])))"
+    },
+    {
+      "table_name": "customers",
+      "conname": "customers_email_key",
+      "contype": "u",
+      "definition": "UNIQUE (email)"
+    },
+    {
+      "table_name": "customers",
+      "conname": "customers_phone_key",
+      "contype": "u",
+      "definition": "UNIQUE (phone)"
+    },
+    {
+      "table_name": "customers",
+      "conname": "customers_pkey",
+      "contype": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "menu_items",
+      "conname": "menu_items_pkey",
+      "contype": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "menu_items",
+      "conname": "menu_items_price_check",
+      "contype": "c",
+      "definition": "CHECK ((price > (0)::numeric))"
+    },
+    {
+      "table_name": "menu_items",
+      "conname": "menu_items_restaurant_id_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (restaurant_id) REFERENCES restaurants(id) ON DELETE CASCADE"
+    },
+    {
+      "table_name": "order_items",
+      "conname": "order_items_menu_item_id_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (menu_item_id) REFERENCES menu_items(id)"
+    },
+    {
+      "table_name": "order_items",
+      "conname": "order_items_order_id_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE CASCADE"
+    },
+    {
+      "table_name": "order_items",
+      "conname": "order_items_pkey",
+      "contype": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "order_items",
+      "conname": "order_items_quantity_check",
+      "contype": "c",
+      "definition": "CHECK ((quantity > 0))"
+    },
+    {
+      "table_name": "order_items",
+      "conname": "order_items_unit_price_check",
+      "contype": "c",
+      "definition": "CHECK ((unit_price > (0)::numeric))"
+    },
+    {
+      "table_name": "order_items",
+      "conname": "uq_order_menu_item",
+      "contype": "u",
+      "definition": "UNIQUE (order_id, menu_item_id)"
+    },
+    {
+      "table_name": "orders",
+      "conname": "ck_delivery_note_length",
+      "contype": "c",
+      "definition": "CHECK ((length(delivery_note) <= 500))"
+    },
+    {
+      "table_name": "orders",
+      "conname": "orders_courier_id_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (courier_id) REFERENCES couriers(id)"
+    },
+    {
+      "table_name": "orders",
+      "conname": "orders_customer_id_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (customer_id) REFERENCES customers(id)"
+    },
+    {
+      "table_name": "orders",
+      "conname": "orders_delivery_status_check",
+      "contype": "c",
+      "definition": "CHECK (((delivery_status)::text = ANY ((ARRAY['створено'::character varying, 'готується'::character varying, 'в дорозі'::character varying, 'доставлено'::character varying, 'скасовано'::character varying])::text[])))"
+    },
+    {
+      "table_name": "orders",
+      "conname": "orders_pkey",
+      "contype": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "orders",
+      "conname": "orders_restaurant_id_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (restaurant_id) REFERENCES restaurants(id)"
+    },
+    {
+      "table_name": "orders",
+      "conname": "orders_total_amount_check",
+      "contype": "c",
+      "definition": "CHECK ((total_amount >= (0)::numeric))"
+    },
+    {
+      "table_name": "payments",
+      "conname": "payments_amount_check",
+      "contype": "c",
+      "definition": "CHECK ((amount > (0)::numeric))"
+    },
+    {
+      "table_name": "payments",
+      "conname": "payments_method_check",
+      "contype": "c",
+      "definition": "CHECK (((method)::text = ANY ((ARRAY['картка'::character varying, 'готівка'::character varying])::text[])))"
+    },
+    {
+      "table_name": "payments",
+      "conname": "payments_order_id_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (order_id) REFERENCES orders(id)"
+    },
+    {
+      "table_name": "payments",
+      "conname": "payments_order_id_key",
+      "contype": "u",
+      "definition": "UNIQUE (order_id)"
+    },
+    {
+      "table_name": "payments",
+      "conname": "payments_pkey",
+      "contype": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "restaurants",
+      "conname": "restaurants_pkey",
+      "contype": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "restaurants",
+      "conname": "restaurants_rating_check",
+      "contype": "c",
+      "definition": "CHECK (((rating >= 1.0) AND (rating <= 5.0)))"
+    },
+    {
+      "table_name": "reviews",
+      "conname": "reviews_comment_check",
+      "contype": "c",
+      "definition": "CHECK (((length(btrim(comment)) >= 1) AND (length(btrim(comment)) <= 2000)))"
+    },
+    {
+      "table_name": "reviews",
+      "conname": "reviews_order_id_fkey",
+      "contype": "f",
+      "definition": "FOREIGN KEY (order_id) REFERENCES orders(id)"
+    },
+    {
+      "table_name": "reviews",
+      "conname": "reviews_order_id_key",
+      "contype": "u",
+      "definition": "UNIQUE (order_id)"
+    },
+    {
+      "table_name": "reviews",
+      "conname": "reviews_pkey",
+      "contype": "p",
+      "definition": "PRIMARY KEY (id)"
+    },
+    {
+      "table_name": "reviews",
+      "conname": "reviews_rating_check",
+      "contype": "c",
+      "definition": "CHECK (((rating >= 1) AND (rating <= 5)))"
+    }
+  ],
+  "indexes": [
+    {
+      "tablename": "couriers",
+      "indexname": "couriers_phone_key",
+      "indexdef": "CREATE UNIQUE INDEX couriers_phone_key ON public.couriers USING btree (phone)"
+    },
+    {
+      "tablename": "couriers",
+      "indexname": "couriers_pkey",
+      "indexdef": "CREATE UNIQUE INDEX couriers_pkey ON public.couriers USING btree (id)"
+    },
+    {
+      "tablename": "customers",
+      "indexname": "customers_email_key",
+      "indexdef": "CREATE UNIQUE INDEX customers_email_key ON public.customers USING btree (email)"
+    },
+    {
+      "tablename": "customers",
+      "indexname": "customers_phone_key",
+      "indexdef": "CREATE UNIQUE INDEX customers_phone_key ON public.customers USING btree (phone)"
+    },
+    {
+      "tablename": "customers",
+      "indexname": "customers_pkey",
+      "indexdef": "CREATE UNIQUE INDEX customers_pkey ON public.customers USING btree (id)"
+    },
+    {
+      "tablename": "menu_items",
+      "indexname": "idx_menu_items_restaurant",
+      "indexdef": "CREATE INDEX idx_menu_items_restaurant ON public.menu_items USING btree (restaurant_id)"
+    },
+    {
+      "tablename": "menu_items",
+      "indexname": "menu_items_pkey",
+      "indexdef": "CREATE UNIQUE INDEX menu_items_pkey ON public.menu_items USING btree (id)"
+    },
+    {
+      "tablename": "order_items",
+      "indexname": "idx_order_items_menu",
+      "indexdef": "CREATE INDEX idx_order_items_menu ON public.order_items USING btree (menu_item_id)"
+    },
+    {
+      "tablename": "order_items",
+      "indexname": "order_items_pkey",
+      "indexdef": "CREATE UNIQUE INDEX order_items_pkey ON public.order_items USING btree (id)"
+    },
+    {
+      "tablename": "order_items",
+      "indexname": "uq_order_menu_item",
+      "indexdef": "CREATE UNIQUE INDEX uq_order_menu_item ON public.order_items USING btree (order_id, menu_item_id)"
+    },
+    {
+      "tablename": "orders",
+      "indexname": "idx_orders_customer_date",
+      "indexdef": "CREATE INDEX idx_orders_customer_date ON public.orders USING btree (customer_id, order_date DESC)"
+    },
+    {
+      "tablename": "orders",
+      "indexname": "idx_orders_restaurant",
+      "indexdef": "CREATE INDEX idx_orders_restaurant ON public.orders USING btree (restaurant_id)"
+    },
+    {
+      "tablename": "orders",
+      "indexname": "orders_pkey",
+      "indexdef": "CREATE UNIQUE INDEX orders_pkey ON public.orders USING btree (id)"
+    },
+    {
+      "tablename": "orders",
+      "indexname": "uq_courier_active_delivery",
+      "indexdef": "CREATE UNIQUE INDEX uq_courier_active_delivery ON public.orders USING btree (courier_id) WHERE ((delivery_status)::text = 'в дорозі'::text)"
+    },
+    {
+      "tablename": "payments",
+      "indexname": "payments_order_id_key",
+      "indexdef": "CREATE UNIQUE INDEX payments_order_id_key ON public.payments USING btree (order_id)"
+    },
+    {
+      "tablename": "payments",
+      "indexname": "payments_pkey",
+      "indexdef": "CREATE UNIQUE INDEX payments_pkey ON public.payments USING btree (id)"
+    },
+    {
+      "tablename": "restaurants",
+      "indexname": "restaurants_pkey",
+      "indexdef": "CREATE UNIQUE INDEX restaurants_pkey ON public.restaurants USING btree (id)"
+    },
+    {
+      "tablename": "reviews",
+      "indexname": "reviews_order_id_key",
+      "indexdef": "CREATE UNIQUE INDEX reviews_order_id_key ON public.reviews USING btree (order_id)"
+    },
+    {
+      "tablename": "reviews",
+      "indexname": "reviews_pkey",
+      "indexdef": "CREATE UNIQUE INDEX reviews_pkey ON public.reviews USING btree (id)"
+    }
+  ],
+  "triggers": [
+    {
+      "table_name": "order_items",
+      "tgname": "order_item_guard",
+      "tgenabled": "O",
+      "definition": "CREATE TRIGGER order_item_guard BEFORE INSERT OR DELETE OR UPDATE ON public.order_items FOR EACH ROW EXECUTE FUNCTION guard_order_item()"
+    },
+    {
+      "table_name": "order_items",
+      "tgname": "order_items_total",
+      "tgenabled": "O",
+      "definition": "CREATE TRIGGER order_items_total AFTER INSERT OR DELETE OR UPDATE ON public.order_items FOR EACH ROW EXECUTE FUNCTION recalculate_order()"
+    },
+    {
+      "table_name": "orders",
+      "tgname": "order_update_guard",
+      "tgenabled": "O",
+      "definition": "CREATE TRIGGER order_update_guard BEFORE UPDATE ON public.orders FOR EACH ROW EXECUTE FUNCTION guard_order_update()"
+    },
+    {
+      "table_name": "payments",
+      "tgname": "payment_guard",
+      "tgenabled": "O",
+      "definition": "CREATE TRIGGER payment_guard BEFORE INSERT OR DELETE OR UPDATE ON public.payments FOR EACH ROW EXECUTE FUNCTION guard_payment()"
+    },
+    {
+      "table_name": "reviews",
+      "tgname": "reviews_order_check",
+      "tgenabled": "O",
+      "definition": "CREATE TRIGGER reviews_order_check BEFORE INSERT OR UPDATE ON public.reviews FOR EACH ROW EXECUTE FUNCTION check_review_order()"
+    }
+  ],
+  "functions": [
+    {
+      "proname": "check_review_order",
+      "definition": "CREATE OR REPLACE FUNCTION public.check_review_order()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE ordered_at TIMESTAMP; current_status TEXT;\nBEGIN\n    SELECT order_date, delivery_status INTO ordered_at, current_status\n    FROM orders WHERE id = NEW.order_id;\n    IF NOT FOUND THEN\n        RAISE EXCEPTION 'Замовлення не знайдено' USING ERRCODE = '23503';\n    END IF;\n    IF current_status <> 'доставлено' THEN\n        RAISE EXCEPTION 'Відгук дозволено лише після доставки'\n            USING ERRCODE = '23514';\n    END IF;\n    IF NEW.created_at < ordered_at THEN\n        RAISE EXCEPTION 'Дата відгуку передує замовленню'\n            USING ERRCODE = '23514';\n    END IF;\n    RETURN NEW;\nEND;\n$function$\n"
+    },
+    {
+      "proname": "complete_order",
+      "definition": "CREATE OR REPLACE FUNCTION public.complete_order(p_order_id integer, p_method text)\n RETURNS integer\n LANGUAGE plpgsql\nAS $function$\nDECLARE target orders%ROWTYPE; payment_id INTEGER; actual_total NUMERIC;\nBEGIN\n    IF p_method IS NULL OR p_method NOT IN ('картка', 'готівка') THEN\n        RAISE EXCEPTION 'Оберіть спосіб оплати' USING ERRCODE = '23514';\n    END IF;\n    SELECT * INTO target FROM orders WHERE id = p_order_id FOR UPDATE;\n    IF NOT FOUND THEN\n        RAISE EXCEPTION 'Замовлення не знайдено' USING ERRCODE = 'P0002';\n    END IF;\n    SELECT id INTO payment_id FROM payments WHERE order_id = p_order_id;\n    IF target.delivery_status = 'доставлено' AND payment_id IS NOT NULL THEN\n        RETURN payment_id;\n    END IF;\n    IF target.delivery_status <> 'в дорозі' OR target.courier_id IS NULL THEN\n        RAISE EXCEPTION 'Завершити можна лише замовлення в дорозі з кур''єром'\n            USING ERRCODE = '23514';\n    END IF;\n    SELECT SUM(quantity * unit_price) INTO actual_total\n    FROM order_items WHERE order_id = p_order_id;\n    IF actual_total IS NULL OR actual_total <> target.total_amount THEN\n        RAISE EXCEPTION 'Сума замовлення не відповідає позиціям'\n            USING ERRCODE = '23514';\n    END IF;\n    INSERT INTO payments(order_id, amount, method)\n    VALUES (p_order_id, target.total_amount, p_method) RETURNING id INTO payment_id;\n    UPDATE orders SET delivery_status = 'доставлено' WHERE id = p_order_id;\n    UPDATE couriers SET is_available = TRUE WHERE id = target.courier_id\n      AND NOT EXISTS (SELECT 1 FROM orders\n                      WHERE courier_id = target.courier_id\n                        AND delivery_status = 'в дорозі');\n    RETURN payment_id;\nEND;\n$function$\n"
+    },
+    {
+      "proname": "guard_order_item",
+      "definition": "CREATE OR REPLACE FUNCTION public.guard_order_item()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE parent orders%ROWTYPE; dish menu_items%ROWTYPE;\nBEGIN\n    IF TG_OP = 'UPDATE' AND (NEW.order_id <> OLD.order_id OR NEW.menu_item_id <> OLD.menu_item_id) THEN\n        RAISE EXCEPTION 'Не можна переносити позицію в інше замовлення' USING ERRCODE='23514';\n    END IF;\n    SELECT * INTO parent FROM orders\n    WHERE id = CASE WHEN TG_OP = 'DELETE' THEN OLD.order_id ELSE NEW.order_id END FOR UPDATE;\n    IF NOT FOUND THEN RETURN OLD; END IF;\n    IF parent.delivery_status <> 'створено' THEN\n        RAISE EXCEPTION 'Позиції можна змінювати лише у створеному замовленні' USING ERRCODE='23514';\n    END IF;\n    IF TG_OP <> 'DELETE' THEN\n        SELECT * INTO dish FROM menu_items WHERE id=NEW.menu_item_id FOR SHARE;\n        IF NOT FOUND OR dish.restaurant_id <> parent.restaurant_id THEN\n            RAISE EXCEPTION 'Страва має належати ресторану замовлення' USING ERRCODE='23514';\n        END IF;\n        IF TG_OP = 'INSERT' AND NOT dish.is_available THEN\n            RAISE EXCEPTION 'Страва недоступна' USING ERRCODE='23514';\n        END IF;\n    END IF;\n    IF TG_OP = 'DELETE' THEN RETURN OLD; END IF;\n    RETURN NEW;\nEND;\n$function$\n"
+    },
+    {
+      "proname": "guard_order_update",
+      "definition": "CREATE OR REPLACE FUNCTION public.guard_order_update()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE actual_total NUMERIC;\nBEGIN\n    IF OLD.delivery_status IN ('в дорозі','доставлено','скасовано')\n       AND NEW.courier_id IS DISTINCT FROM OLD.courier_id THEN\n        RAISE EXCEPTION 'Кур''єр активної або завершеної доставки незмінний' USING ERRCODE='23514';\n    END IF;\n    IF NEW.customer_id<>OLD.customer_id OR NEW.restaurant_id<>OLD.restaurant_id\n       OR NEW.order_date<>OLD.order_date THEN\n        RAISE EXCEPTION 'Клієнт, ресторан та дата оформленого замовлення незмінні' USING ERRCODE='23514';\n    END IF;\n    SELECT COALESCE(SUM(quantity*unit_price),0) INTO actual_total FROM order_items WHERE order_id=OLD.id;\n    IF NEW.total_amount<>actual_total THEN\n        RAISE EXCEPTION 'Сума має відповідати позиціям замовлення' USING ERRCODE='23514';\n    END IF;\n    IF NEW.delivery_status<>OLD.delivery_status THEN\n        IF NOT ((OLD.delivery_status='створено' AND NEW.delivery_status IN ('готується','скасовано'))\n             OR (OLD.delivery_status='готується' AND NEW.delivery_status IN ('в дорозі','скасовано'))\n             OR (OLD.delivery_status='в дорозі' AND NEW.delivery_status IN ('доставлено','скасовано'))) THEN\n            RAISE EXCEPTION 'Недопустима зміна статусу замовлення' USING ERRCODE='23514';\n        END IF;\n        IF NEW.delivery_status IN ('готується','в дорозі','доставлено') AND actual_total<=0 THEN\n            RAISE EXCEPTION 'Замовлення не містить позицій' USING ERRCODE='23514';\n        END IF;\n        IF NEW.delivery_status='доставлено' AND NOT EXISTS\n           (SELECT 1 FROM payments WHERE order_id=OLD.id AND amount=NEW.total_amount) THEN\n            RAISE EXCEPTION 'Потрібно зафіксувати оплату' USING ERRCODE='23514';\n        END IF;\n    END IF;\n    IF NEW.delivery_status='в дорозі' AND NEW.courier_id IS NULL THEN\n        RAISE EXCEPTION 'Призначте кур''єра' USING ERRCODE='23514';\n    END IF;\n    IF OLD.delivery_status IN ('доставлено','скасовано') AND NEW IS DISTINCT FROM OLD THEN\n        RAISE EXCEPTION 'Завершене замовлення не редагується' USING ERRCODE='23514';\n    END IF;\n    RETURN NEW;\nEND;\n$function$\n"
+    },
+    {
+      "proname": "guard_payment",
+      "definition": "CREATE OR REPLACE FUNCTION public.guard_payment()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE target orders%ROWTYPE;\nBEGIN\n    IF TG_OP<>'INSERT' THEN\n        RAISE EXCEPTION 'Зареєстрована оплата незмінна' USING ERRCODE='23514';\n    END IF;\n    SELECT * INTO target FROM orders WHERE id=NEW.order_id FOR UPDATE;\n    IF NOT FOUND OR target.delivery_status<>'в дорозі' OR NEW.amount<>target.total_amount THEN\n        RAISE EXCEPTION 'Оплата має відповідати замовленню в дорозі' USING ERRCODE='23514';\n    END IF;\n    RETURN NEW;\nEND;\n$function$\n"
+    },
+    {
+      "proname": "recalculate_order",
+      "definition": "CREATE OR REPLACE FUNCTION public.recalculate_order()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\nDECLARE parent_id INTEGER;\nBEGIN\n    parent_id := CASE WHEN TG_OP='DELETE' THEN OLD.order_id ELSE NEW.order_id END;\n    UPDATE orders SET total_amount=(SELECT COALESCE(SUM(quantity*unit_price),0)\n                                    FROM order_items WHERE order_id=parent_id)\n    WHERE id=parent_id;\n    RETURN NULL;\nEND;\n$function$\n"
+    }
+  ],
+  "views": [
+    {
+      "viewname": "active_orders",
+      "definition": " SELECT o.id,\n    o.order_date,\n    c.full_name AS customer,\n    c.phone AS customer_phone,\n    r.name AS restaurant,\n    co.full_name AS courier,\n    o.delivery_address,\n    o.delivery_note,\n    o.total_amount,\n    o.delivery_status\n   FROM (((orders o\n     JOIN customers c ON ((c.id = o.customer_id)))\n     JOIN restaurants r ON ((r.id = o.restaurant_id)))\n     LEFT JOIN couriers co ON ((co.id = o.courier_id)))\n  WHERE ((o.delivery_status)::text = ANY ((ARRAY['створено'::character varying, 'готується'::character varying, 'в дорозі'::character varying])::text[]));"
+    }
+  ]
+}

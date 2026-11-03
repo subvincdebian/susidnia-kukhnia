@@ -1,0 +1,1125 @@
+.home-shell {
+  min-height: 100vh;
+  background: var(--home-paper);
+  color: var(--home-ink);
+}
+.home-shell .home-header {
+  min-height: 104px;
+  padding-block: 1.5rem;
+  border-bottom: 1px solid var(--home-line);
+}
+.home-header .brand {
+  font-size: 1.4rem;
+  gap: 0.7rem;
+  flex-shrink: 0;
+}
+.home-header .brand-mark {
+  width: 44px;
+  height: 44px;
+}
+.home-header .brand small {
+  font-size: 0.7rem;
+  color: var(--home-muted);
+}
+.home-nav,
+.home-header-end {
+  display: flex;
+  align-items: center;
+  gap: 1.6rem;
+}
+.home-nav a {
+  padding: 0.7rem 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--home-muted);
+}
+.home-nav a[aria-current="page"] {
+  color: var(--primary);
+}
+.home-nav a:hover {
+  color: var(--primary);
+  text-decoration: none;
+}
+.home-city {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.875rem;
+}
+.home-city svg {
+  width: 19px;
+  height: 19px;
+  color: var(--primary);
+}
+.home-manage {
+  margin: 0;
+  position: relative;
+}
+.home-manage summary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding: 0.6rem 0.9rem;
+  border: 1px solid var(--home-line);
+  border-radius: var(--control-radius);
+  font-size: 0.8125rem;
+  cursor: pointer;
+  list-style: none;
+}
+.home-manage summary::-webkit-details-marker {
+  display: none;
+}
+.home-manage summary svg {
+  width: 16px;
+  height: 16px;
+}
+.home-manage[open] summary,
+.home-manage summary:hover {
+  background: var(--home-soft);
+}
+.home-manage nav {
+  position: absolute;
+  z-index: 5;
+  inset-inline-end: 0;
+  top: calc(100% + 0.5rem);
+  display: grid;
+  min-width: 200px;
+  padding: 0.4rem;
+  border: 1px solid var(--home-line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  box-shadow: 0 10px 30px #29231f12;
+}
+.home-manage nav a {
+  padding: 0.8rem;
+  color: var(--home-ink);
+  border-radius: var(--control-radius);
+}
+.home-manage nav a:hover {
+  background: var(--home-paper);
+  color: var(--primary);
+  text-decoration: none;
+}
+.home-shell main {
+  padding-top: 1.5rem;
+  padding-bottom: 0;
+}
+.home-hero {
+  display: grid;
+  grid-template-columns: 1fr 1.07fr;
+  gap: 2.5rem;
+  align-items: center;
+  min-height: 580px;
+  padding-block: 1.75rem 3rem;
+}
+.home-hero-copy {
+  min-width: 0;
+  padding-block: 1rem;
+}
+.home-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0 0 1.4rem;
+  color: var(--home-muted);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+.home-eyebrow > span {
+  width: 7px;
+  height: 7px;
+  background: var(--primary);
+  border-radius: 50%;
+}
+.home-hero h1 {
+  margin: 0;
+  font-size: clamp(2.8rem, 5.6vw, 4.5rem);
+  font-weight: 650;
+  line-height: 1.07;
+  letter-spacing: -0.065em;
+}
+.home-hero h1 > span {
+  color: var(--primary);
+}
+.home-intro {
+  max-width: 26rem;
+  margin: 1.5rem 0 1.8rem;
+  color: var(--home-muted);
+  font-size: 1rem;
+  line-height: 1.75;
+}
+.home-search {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem;
+  border: 1px solid var(--home-line);
+  border-radius: var(--radius);
+  background: var(--surface);
+  max-width: 30rem;
+}
+.home-search:focus-within {
+  border-color: var(--primary);
+}
+.home-search-input {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+.home-search-input > svg {
+  flex-shrink: 0;
+  width: 21px;
+  height: 21px;
+  margin-left: 0.65rem;
+  color: var(--home-muted);
+}
+.home-search input {
+  border: 0;
+  background: transparent;
+  padding: 0.7rem 2.3rem 0.7rem 0.65rem;
+  font-size: 0.875rem;
+  min-width: 0;
+  border-radius: 4px;
+}
+.home-search input::-webkit-search-cancel-button {
+  display: none;
+}
+.home-search .home-search-clear {
+  position: absolute;
+  right: 0;
+  padding: 0;
+  width: 36px;
+  height: 44px;
+  min-height: 44px;
+  border: 0;
+  background: transparent;
+  font-size: 1.4rem;
+  color: var(--home-muted);
+}
+.home-search button.primary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.7rem;
+  min-width: 108px;
+  min-height: 50px;
+  padding: 0.6rem 0.9rem;
+  font-size: 0.875rem;
+}
+.home-search button.primary svg {
+  width: 18px;
+  height: 18px;
+}
+.home-quiet-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding-block: 0.9rem;
+  margin-top: 0.25rem;
+  font-size: 0.8125rem;
+  color: var(--home-muted);
+}
+.home-quiet-link svg {
+  width: 16px;
+  height: 16px;
+}
+.home-quiet-link:hover {
+  color: var(--primary);
+}
+.home-hero-media {
+  min-width: 0;
+  height: 530px;
+  position: relative;
+}
+.home-hero-status {
+  display: flex;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 2rem;
+  border: 1px solid var(--home-line);
+  border-radius: var(--home-radius);
+  text-align: center;
+}
+.home-hero-status .brand-mark {
+  font-family: Georgia, "Times New Roman", serif;
+}
+.home-hero-status h2 {
+  margin: 1.5rem 0 0.75rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  line-height: 1.25;
+}
+.home-hero-status p {
+  margin: 0 0 1.5rem;
+  color: var(--home-muted);
+  font-size: 0.875rem;
+  max-width: 20rem;
+}
+.home-menu-note {
+  position: absolute;
+  left: 0.5rem;
+  top: 0;
+  color: var(--home-muted);
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+.home-food {
+  --food-caption: 110px;
+  --food-tilt: -6deg;
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--home-line);
+  border-radius: var(--home-radius);
+  background: var(--surface);
+  color: var(--home-ink);
+  text-align: left;
+  box-shadow: 0 10px 32px #39251a0d;
+  transform: rotate(var(--food-tilt));
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+button.home-food:hover {
+  background: var(--surface);
+  border-color: var(--primary);
+  transform: translateY(-5px) rotate(var(--food-tilt));
+  box-shadow: 0 16px 36px #39251a16;
+}
+.home-food-main {
+  top: 68px;
+  left: 0;
+  width: 65%;
+  height: 395px;
+}
+.home-food-second {
+  --food-tilt: 6deg;
+  --food-caption: 87px;
+  z-index: 1;
+  top: 18px;
+  right: 0;
+  width: 43%;
+  height: 228px;
+}
+.home-food-third {
+  --food-tilt: 4deg;
+  --food-caption: 87px;
+  z-index: 2;
+  top: 268px;
+  right: 0;
+  width: 43%;
+  height: 228px;
+}
+.home-food .catalog-photo {
+  width: 100%;
+  height: calc(100% - var(--food-caption));
+  aspect-ratio: auto;
+  flex-shrink: 0;
+  background: var(--surface);
+}
+.home-food .catalog-photo img {
+  object-fit: contain;
+}
+.home-food-third .catalog-photo img {
+  object-fit: cover;
+}
+.home-food-caption {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 100%;
+  min-height: var(--food-caption);
+  padding: 0.6rem 1rem;
+  border-top: 1px solid var(--home-line);
+}
+.home-food-restaurant {
+  color: var(--home-muted);
+  font-size: 0.6875rem;
+}
+.home-food-name {
+  display: block;
+  margin-top: 0.2rem;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-weight: 600;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+.home-food-price {
+  display: block;
+  margin-top: 0.25rem;
+  color: var(--primary);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.home-food-main .home-food-caption {
+  padding: 0.7rem 3rem 0.8rem 1rem;
+}
+.home-food-main .home-food-name {
+  font-size: 1rem;
+}
+.home-food-main .home-food-price {
+  font-size: 1rem;
+}
+.home-food-arrow {
+  position: absolute;
+  right: 1rem;
+  bottom: 1.1rem;
+  width: 20px;
+  height: 20px;
+  color: var(--primary);
+}
+.home-food-second .home-food-arrow,
+.home-food-third .home-food-arrow {
+  display: none;
+}
+.home-food-placeholder {
+  justify-content: flex-end;
+}
+.home-food-placeholder > span {
+  min-height: var(--food-caption);
+  display: flex;
+  align-items: center;
+  padding: 1rem;
+  color: var(--home-muted);
+  font-size: 0.75rem;
+}
+.home-food-placeholder-image {
+  flex: 1;
+  background: var(--home-soft);
+  margin: 1.5rem;
+  border-radius: 50%;
+}
+.home-food-error {
+  justify-content: center;
+  padding: 1rem;
+  gap: 0.5rem;
+  font-size: 0.8125rem;
+  transform: none;
+}
+.home-food-error p {
+  margin: 0;
+}
+.home-food-error button {
+  min-height: 44px;
+}
+.home-photo-note {
+  position: absolute;
+  bottom: 0;
+  left: 0.5rem;
+  color: var(--home-muted);
+  font-size: 0.6875rem;
+}
+.home-cuisines {
+  border-block: 1px solid var(--home-line);
+  padding-block: 1.5rem;
+  display: flex;
+  gap: 1rem 2rem;
+  align-items: center;
+}
+.home-cuisines h2 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin: 0;
+  flex-shrink: 0;
+}
+.home-cuisine-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  flex: 1;
+  justify-content: flex-end;
+}
+.home-cuisine-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--home-line);
+  border-radius: 30px;
+  color: var(--home-ink);
+  font-size: 0.75rem;
+  transition:
+    border-color 150ms ease,
+    background 150ms ease;
+}
+.home-cuisine-number {
+  color: var(--home-muted);
+  font-size: 0.625rem;
+}
+.home-cuisine-link svg {
+  width: 13px;
+  height: 13px;
+}
+.home-cuisine-link:hover {
+  text-decoration: none;
+  border-color: var(--primary);
+  background: var(--surface);
+}
+.home-restaurants {
+  padding-top: 4.5rem;
+}
+.home-section-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+.home-section-heading .home-eyebrow {
+  margin-bottom: 0.8rem;
+}
+.home-section-heading h2 {
+  margin: 0;
+  font-size: clamp(1.8rem, 3.1vw, 2.5rem);
+  line-height: 1.15;
+  font-weight: 600;
+  letter-spacing: -0.045em;
+}
+.home-all-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 1rem;
+  flex-shrink: 0;
+  padding: 0.8rem 0;
+  border-bottom: 1px solid var(--home-line);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+.home-all-link svg {
+  width: 18px;
+  height: 18px;
+}
+.home-restaurant-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 2rem 1.5rem;
+}
+.home-restaurant-card {
+  min-width: 0;
+}
+.home-restaurant-card > :is(button, a) {
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius);
+  background: transparent;
+  text-align: left;
+  color: var(--home-ink);
+}
+.home-restaurant-card > :is(button, a):hover {
+  background: transparent;
+}
+.home-restaurant-card .catalog-photo {
+  aspect-ratio: 1.65;
+  border-radius: var(--radius);
+  background: var(--home-soft);
+}
+.home-restaurant-card .catalog-photo img {
+  transition: transform 250ms ease;
+}
+.home-restaurant-card > :is(button, a):hover img {
+  transform: scale(1.035);
+}
+.home-restaurant-body {
+  display: flex;
+  position: relative;
+  flex-direction: column;
+  padding: 1rem 3.3rem 0 0;
+}
+.home-restaurant-cuisine {
+  font-size: 0.6875rem;
+  color: var(--home-muted);
+}
+.home-restaurant-name {
+  font-size: 1.3rem;
+  font-weight: 650;
+  letter-spacing: -0.035em;
+  line-height: 1.3;
+  margin-top: 0.35rem;
+}
+.home-restaurant-address {
+  min-height: 2.7em;
+  margin-top: 0.5rem;
+  color: var(--home-muted);
+  font-size: 0.75rem;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.home-restaurant-arrow {
+  display: grid;
+  place-items: center;
+  position: absolute;
+  right: 0;
+  top: 1.2rem;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--home-line);
+  border-radius: 50%;
+  transition:
+    background 150ms ease,
+    color 150ms ease;
+}
+.home-restaurant-arrow svg {
+  width: 18px;
+  height: 18px;
+}
+.home-restaurant-card > :is(button, a):hover .home-restaurant-arrow {
+  color: var(--surface);
+  background: var(--primary);
+  border-color: var(--primary);
+}
+.home-restaurants .state {
+  min-height: 320px;
+}
+.home-how {
+  border-top: 1px solid var(--home-line);
+  padding-block: 4rem;
+  margin-top: 4rem;
+}
+.home-steps {
+  margin: 2.5rem 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 2.5rem;
+  list-style: none;
+}
+.home-step-number {
+  display: inline-block;
+  margin-bottom: 1.3rem;
+  color: var(--primary);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  border-bottom: 1px solid var(--home-line);
+  padding-bottom: 0.7rem;
+  min-width: 3rem;
+}
+.home-steps h3 {
+  margin: 0 0 0.6rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+.home-steps p {
+  margin: 0;
+  color: var(--home-muted);
+  font-size: 0.875rem;
+  line-height: 1.75;
+  max-width: 20rem;
+}
+.home-invitation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  padding: 2.5rem 3rem;
+  background: var(--primary);
+  color: var(--surface);
+  border-radius: var(--home-radius);
+}
+.home-invitation p {
+  margin: 0 0 0.6rem;
+  font-size: 0.8125rem;
+}
+.home-invitation h2 {
+  margin: 0;
+  font-size: clamp(1.6rem, 3vw, 2.25rem);
+  font-weight: 600;
+  letter-spacing: -0.045em;
+  line-height: 1.2;
+}
+.home-invitation-link {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  min-height: 54px;
+  padding: 0.8rem 1.2rem;
+  border: 1px solid var(--surface);
+  background: var(--surface);
+  color: var(--primary);
+  border-radius: var(--control-radius);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+.home-invitation-link:hover {
+  text-decoration: none;
+  background: var(--home-paper);
+  border-color: var(--home-paper);
+}
+.home-invitation-link svg {
+  width: 20px;
+  height: 20px;
+}
+.home-shell .home-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 2rem;
+  max-width: var(--page-max);
+  margin: 4rem auto 0;
+  padding: 2rem 1.5rem;
+  border-top: 1px solid var(--home-line);
+  color: var(--home-muted);
+}
+.home-footer-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--home-ink);
+  font:
+    700 1.3rem Georgia,
+    "Times New Roman",
+    serif;
+}
+.home-footer-brand span {
+  color: var(--primary);
+}
+.home-footer p {
+  margin: 0.6rem 0 0;
+  font-size: 0.75rem;
+  line-height: 1.7;
+}
+.home-footer-note {
+  max-width: 26rem;
+}
+.home-footer-note p {
+  margin-top: 0;
+}
+.home-footer-note small {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.6875rem;
+}
+
+@media (min-width: 1440px) {
+  .home-hero {
+    padding-block: 2.5rem 3.5rem;
+  }
+}
+@media (max-width: 1050px) {
+  .home-shell .home-header {
+    flex-wrap: wrap;
+  }
+  .home-header .brand {
+    margin-right: auto;
+  }
+  .home-header-end {
+    gap: 1rem;
+  }
+  .home-nav {
+    order: 3;
+    width: 100%;
+    gap: 1.75rem;
+  }
+  .home-hero {
+    gap: 1.75rem;
+    min-height: 530px;
+  }
+  .home-hero-media {
+    height: 465px;
+  }
+  .home-food-main {
+    top: 70px;
+    height: 330px;
+    width: 67%;
+  }
+  .home-food-second,
+  .home-food-third {
+    width: 44%;
+    height: 200px;
+  }
+  .home-food-third {
+    top: 230px;
+  }
+  .home-food-caption {
+    padding-inline: 0.65rem;
+  }
+  .home-food-main .home-food-caption {
+    padding-left: 0.75rem;
+    padding-right: 2rem;
+  }
+  .home-food-main .home-food-name {
+    font-size: 0.875rem;
+  }
+  .home-food-arrow {
+    right: 0.5rem;
+    width: 17px;
+  }
+  .home-hero h1 {
+    font-size: clamp(2.5rem, 5.7vw, 3.75rem);
+  }
+  .home-cuisines {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .home-cuisine-links {
+    justify-content: flex-start;
+  }
+}
+@media (max-width: 760px) {
+  .home-shell .home-header {
+    min-height: 0;
+    gap: 0.75rem;
+    padding: 1.1rem 1.25rem 0;
+  }
+  .home-header .brand {
+    font-size: 1.25rem;
+  }
+  .home-header .brand small {
+    display: none;
+  }
+  .home-header .brand-mark {
+    width: 38px;
+    height: 38px;
+    font-size: 1rem;
+    border-radius: 13px 13px 13px 4px;
+  }
+  .home-header-end {
+    gap: 0.75rem;
+  }
+  .home-city {
+    font-size: 0.75rem;
+  }
+  .home-manage summary {
+    padding-inline: 0.6rem;
+    font-size: 0.75rem;
+  }
+  .home-nav {
+    justify-content: flex-start;
+    gap: 1.75rem;
+  }
+  .home-nav a {
+    padding-block: 0.8rem;
+  }
+  .home-shell main {
+    padding: 1rem 1.25rem 0;
+  }
+  .home-hero {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    padding-block: 1.5rem 2rem;
+  }
+  .home-hero-copy {
+    padding: 0;
+  }
+  .home-hero h1 {
+    font-size: clamp(2.75rem, 8.5vw, 4rem);
+  }
+  .home-eyebrow {
+    margin-bottom: 1.1rem;
+  }
+  .home-intro {
+    max-width: 30rem;
+    margin-block: 1.2rem 1.5rem;
+  }
+  .home-search {
+    max-width: 100%;
+  }
+  .home-hero-media {
+    width: 100%;
+    max-width: 490px;
+    height: 420px;
+    margin: 0.25rem auto 0;
+  }
+  .home-menu-note {
+    display: none;
+  }
+  .home-food-main {
+    top: 32px;
+    width: 64%;
+    height: 335px;
+  }
+  .home-food-second,
+  .home-food-third {
+    width: 44%;
+    height: 180px;
+  }
+  .home-food-second {
+    top: 0;
+  }
+  .home-food-third {
+    top: 200px;
+  }
+  .home-food {
+    --food-caption: 90px;
+  }
+  .home-food-second,
+  .home-food-third {
+    --food-caption: 79px;
+  }
+  .home-food-name {
+    font-size: 0.75rem;
+  }
+  .home-food-main .home-food-name {
+    font-size: 0.875rem;
+  }
+  .home-food-restaurant {
+    font-size: 0.625rem;
+  }
+  .home-food-price {
+    font-size: 0.75rem;
+  }
+  .home-food-main .home-food-price {
+    font-size: 0.875rem;
+  }
+  .home-food-caption {
+    padding-block: 0.5rem;
+  }
+  .home-photo-note {
+    bottom: 0;
+    font-size: 0.625rem;
+  }
+  .home-cuisines {
+    padding-block: 1.25rem;
+    gap: 1rem;
+  }
+  .home-cuisine-link {
+    padding-inline: 0.7rem;
+  }
+  .home-cuisine-number {
+    display: none;
+  }
+  .home-restaurants {
+    padding-top: 3rem;
+  }
+  .home-section-heading {
+    margin-bottom: 1.5rem;
+    align-items: flex-start;
+  }
+  .home-section-heading h2 {
+    font-size: 1.9rem;
+  }
+  .home-section-heading .home-eyebrow {
+    font-size: 0.625rem;
+  }
+  .home-all-link {
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    margin-top: 1.7rem;
+    white-space: nowrap;
+  }
+  .home-restaurant-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem 1rem;
+  }
+  .home-restaurant-name {
+    font-size: 1.1rem;
+  }
+  .home-restaurant-body {
+    padding-right: 2.5rem;
+  }
+  .home-restaurant-arrow {
+    width: 32px;
+    height: 32px;
+  }
+  .home-how {
+    padding-block: 3rem;
+    margin-top: 3rem;
+  }
+  .home-steps {
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+  .home-step-number {
+    margin-bottom: 1rem;
+  }
+  .home-steps h3 {
+    font-size: 1rem;
+  }
+  .home-steps p {
+    font-size: 0.8125rem;
+  }
+  .home-invitation {
+    padding: 2rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+  }
+  .home-shell .home-footer {
+    flex-direction: column;
+    margin-top: 3rem;
+    padding: 1.5rem 1.25rem;
+    gap: 1.5rem;
+  }
+  .home-footer-note {
+    max-width: 32rem;
+  }
+}
+@media (max-width: 480px) {
+  .home-header .brand {
+    font-size: 1.15rem;
+    gap: 0.5rem;
+  }
+  .home-header-end .home-city {
+    display: none;
+  }
+  .home-nav {
+    gap: 1.5rem;
+  }
+  .home-hero {
+    padding-top: 1rem;
+  }
+  .home-hero h1 {
+    font-size: clamp(2.6rem, 10.5vw, 3.2rem);
+  }
+  .home-intro {
+    font-size: 0.9375rem;
+    line-height: 1.7;
+  }
+  .home-search-input > svg {
+    margin-left: 0.3rem;
+    width: 18px;
+  }
+  .home-search button.primary {
+    min-width: 90px;
+    gap: 0.35rem;
+    padding-inline: 0.65rem;
+  }
+  .home-search input {
+    font-size: 0.8125rem;
+    padding-left: 0.4rem;
+  }
+  .home-hero-media {
+    height: 370px;
+    margin-top: 0.5rem;
+  }
+  .home-food-main {
+    height: 285px;
+    top: 32px;
+  }
+  .home-food-second,
+  .home-food-third {
+    height: 157px;
+  }
+  .home-food-third {
+    top: 180px;
+  }
+  .home-food-main .home-food-caption {
+    padding-right: 0.6rem;
+  }
+  .home-food-main .home-food-name {
+    font-size: 0.8125rem;
+  }
+  .home-food-arrow {
+    display: none;
+  }
+  .home-food-placeholder > span {
+    padding: 0.6rem;
+    font-size: 0.6875rem;
+  }
+  .home-section-heading h2 {
+    font-size: 1.8rem;
+  }
+  .home-section-heading {
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+  .home-section-heading .home-all-link {
+    margin-top: 0;
+    padding-block: 0.6rem;
+  }
+  .home-restaurant-grid {
+    grid-template-columns: 1fr;
+    gap: 1.75rem;
+  }
+  .home-restaurant-card .catalog-photo {
+    aspect-ratio: 1.8;
+  }
+  .home-restaurant-name {
+    font-size: 1.3rem;
+  }
+  .home-restaurant-body {
+    padding-top: 0.85rem;
+  }
+  .home-restaurant-address {
+    min-height: 0;
+    padding-right: 0.5rem;
+  }
+  .home-restaurant-arrow {
+    width: 40px;
+    height: 40px;
+    top: 1rem;
+  }
+  .home-steps {
+    grid-template-columns: 1fr;
+    gap: 1.75rem;
+  }
+  .home-steps li {
+    display: grid;
+    grid-template-columns: 2rem 1fr;
+    gap: 0.4rem 1rem;
+  }
+  .home-step-number {
+    grid-row: span 2;
+    padding-bottom: 0;
+    border: 0;
+    min-width: 0;
+    margin: 0.15rem 0 0;
+  }
+  .home-steps h3 {
+    margin: 0;
+  }
+  .home-steps p {
+    grid-column: 2;
+    max-width: none;
+    font-size: 0.875rem;
+  }
+  .home-invitation {
+    padding: 1.75rem 1.5rem;
+  }
+  .home-invitation-link {
+    width: 100%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-shell *,
+  .home-shell *::before,
+  .home-shell *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+@media (max-width: 360px) {
+  .home-shell .home-header {
+    gap: 0.5rem;
+    padding-inline: 1rem;
+  }
+  .home-shell main {
+    padding-inline: 1rem;
+  }
+  .home-header .brand {
+    gap: 0.4rem;
+    font-size: 1rem;
+  }
+  .home-header .brand-mark {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px 10px 10px 4px;
+  }
+}
+@media (forced-colors: active) {
+  .home-food,
+  .home-invitation,
+  .home-restaurant-arrow {
+    border: 1px solid CanvasText;
+  }
+}

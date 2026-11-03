@@ -1,0 +1,8 @@
+BEGIN;
+CREATE TABLE _app_data_seeds (
+    name VARCHAR(100) PRIMARY KEY,
+    source_sha256 VARCHAR(64) NOT NULL,
+    applied_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    summary JSONB NOT NULL
+);
+COMMIT;
