@@ -1,5 +1,6 @@
 import type { PGliteInterface } from "@electric-sql/pglite";
 import { createOrders } from "./orders.ts";
+import { createBrowserAuth, memoryTokenStore, type BrowserTokenStore, type BrowserUser } from "./auth.ts";
 import { jsonValue, one, page, rows, type Row } from "./sql.ts";
 import { date, fail, filters, flag, integer, minorUnits, money, object, phone, publicError, statuses, text } from "./validation.ts";
 export { BrowserApiError } from "./validation.ts";
@@ -13,10 +14,15 @@ function courierFields(input: unknown) {
   return [text(body.full_name, "full_name", 100), phone(body.phone), vehicle];
 }
 
-export function createBrowserApi(db: PGliteInterface) {
+export function createBrowserApi(db: PGliteInterface, tokenStore: BrowserTokenStore = memoryTokenStore()) {
   const orders = createOrders(db);
+  const auth = createBrowserAuth(db, tokenStore);
 
-  async function bootstrap() {
+  async function bootstrap(user: BrowserUser | null) {
+    if (user?.role !== "admin") {
+      const restaurants = await rows(db, "SELECT id,name,is_active FROM restaurants ORDER BY name LIMIT 200");
+      return { customers: [], couriers: [], restaurants, counts: {}, statuses };
+    }
     const customers = await rows(db, "SELECT id,full_name,default_delivery_address FROM customers ORDER BY full_name LIMIT 200");
     const couriers = await rows(db, "SELECT id,full_name,vehicle_type,is_available,is_active FROM couriers WHERE is_active ORDER BY full_name LIMIT 200");
     const restaurants = await rows(db, "SELECT id,name,is_active FROM restaurants ORDER BY name LIMIT 200");
@@ -123,9 +129,10 @@ export function createBrowserApi(db: PGliteInterface) {
       return one(tx, `UPDATE couriers SET is_active=TRUE,is_available=NOT EXISTS(SELECT 1 FROM orders WHERE courier_id=$1 AND delivery_status='в дорозі') WHERE id=$1 RETURNING *`, [id]);
     });
   }
-  function reviewList(query: Record<string, unknown>) {
+  function reviewList(query: Record<string, unknown>, customerId: number | null) {
     return page(db, `SELECT v.*,o.customer_id,c.full_name AS customer,r.name AS restaurant FROM reviews v JOIN orders o ON o.id=v.order_id
-      JOIN customers c ON c.id=o.customer_id JOIN restaurants r ON r.id=o.restaurant_id ORDER BY v.created_at DESC,v.id DESC`, [], filters(query).page);
+      JOIN customers c ON c.id=o.customer_id JOIN restaurants r ON r.id=o.restaurant_id
+      WHERE ($1::integer IS NULL OR o.customer_id=$1) ORDER BY v.created_at DESC,v.id DESC`, [customerId], filters(query).page);
   }
   function reviewOptions() {
     return rows(db, `SELECT o.id,c.full_name AS customer,r.name AS restaurant FROM orders o JOIN customers c ON c.id=o.customer_id
@@ -165,22 +172,62 @@ export function createBrowserApi(db: PGliteInterface) {
     const [resource, rawId, operation] = segments;
     if (segments.length > 3) fail(404, "Сторінку не знайдено");
     const id = () => integer(Number(rawId), "id");
+    if (resource === "auth" && segments.length === 2) {
+      if (method === "GET" && rawId === "session") return { user: await auth.current() };
+      if (method === "POST" && rawId === "login") return auth.login(body);
+      if (method === "POST" && rawId === "register") return auth.register(body);
+      if (method === "POST" && rawId === "logout") return auth.logout();
+      fail(404, "Сторінку не знайдено");
+    }
+    const user = await auth.current();
+    const publicRead = method === "GET" && (resource === "session" && segments.length === 1
+      || resource === "bootstrap" && segments.length === 1
+      || resource === "restaurants" && segments.length <= 2);
+    if (!publicRead) {
+      if (!user) fail(401, "Увійдіть до облікового запису");
+      if (user.role !== "admin") {
+        const ownOrder = async (orderId: number) => {
+          if (!(await rows(db, "SELECT id FROM orders WHERE id=$1 AND customer_id=$2", [orderId, user.customer_id])).length)
+            fail(404, "Замовлення не знайдено");
+        };
+        if (resource === "orders" && segments.length === 2 && (method === "GET" && rawId === "recent" || method === "POST" && rawId === "checkout")) {
+          // The scoped handlers below bind both history and checkout to this account.
+        } else if (resource === "orders" && (method === "GET" && segments.length === 2
+          || segments.length === 3 && (method === "GET" && operation === "messages"
+            || method === "POST" && ["payment", "messages"].includes(operation ?? "")
+            || method === "PATCH" && ["address", "note"].includes(operation ?? "")))) {
+          await ownOrder(id());
+          if (method === "POST" && operation === "messages" && object(body).sender !== "customer")
+            fail(403, "Повідомлення від кур’єра доступне лише в панелі керування");
+        } else if (resource === "reviews" && segments.length === 1 && method === "POST") {
+          await ownOrder(integer(object(body).order_id, "order_id"));
+        } else if (resource === "reviews" && segments.length === 2 && ["PATCH", "DELETE"].includes(method)) {
+          const [review] = await rows<{ order_id: number }>(db, "SELECT v.order_id FROM reviews v JOIN orders o ON o.id=v.order_id WHERE v.id=$1 AND o.customer_id=$2", [id(), user.customer_id]);
+          if (!review) fail(404, "Відгук не знайдено");
+        } else if (!(["review-options", "reviews"].includes(resource ?? "") && segments.length === 1 && method === "GET")) {
+          fail(403, "Розділ доступний лише адміністратору");
+        }
+      }
+    }
     if (method === "GET") {
       if (segments.length === 1) {
         if (resource === "session") return { ready: true };
-        if (resource === "bootstrap") return bootstrap();
+        if (resource === "bootstrap") return bootstrap(user);
         if (resource === "restaurants") return restaurantList(query);
         if (resource === "customers") return customerList(query);
         if (resource === "couriers") return courierList(query);
         if (resource === "orders") return orders.list(query);
-        if (resource === "reviews") return reviewList(query);
-        if (resource === "review-options") return reviewOptions();
+        if (resource === "reviews") return reviewList(query, user?.role === "user" ? user.customer_id : null);
+        if (resource === "review-options") {
+          if (user?.role === "user") return rows(db, "SELECT o.id,r.name AS restaurant,o.order_date FROM orders o JOIN restaurants r ON r.id=o.restaurant_id LEFT JOIN reviews v ON v.order_id=o.id WHERE o.customer_id=$1 AND o.delivery_status='доставлено' AND v.id IS NULL ORDER BY o.order_date DESC,o.id DESC LIMIT 100", [user.customer_id]);
+          return reviewOptions();
+        }
         if (resource === "analytics") return analytics(query);
       }
       if (segments.length === 2) {
         if (resource === "restaurants" && rawId === "map") return restaurantMap();
         if (resource === "restaurants") return restaurantGet(id());
-        if (resource === "orders" && rawId === "recent") return orders.recent(query);
+        if (resource === "orders" && rawId === "recent" && user) return orders.recent(query, user.customer_id);
         if (resource === "orders") return orders.get(id());
       }
       if (resource === "couriers" && operation === "delivery") return courierDelivery(id());
@@ -195,7 +242,7 @@ export function createBrowserApi(db: PGliteInterface) {
         if (resource === "reviews") return reviewSave(null, body);
         if (resource === "orders") return orders.create(body);
       }
-      if (resource === "orders" && rawId === "checkout" && segments.length === 2) return orders.checkout(body);
+      if (resource === "orders" && rawId === "checkout" && segments.length === 2 && user) return orders.checkout(body, user.customer_id);
       if (resource === "orders" && operation === "payment") return orders.pay(id(), body);
       if (resource === "orders" && operation === "courier-location") return orders.updateCourierLocation(id(), body);
       if (resource === "orders" && operation === "messages") return orders.sendMessage(id(), body);

@@ -13,6 +13,15 @@ export class ApiError extends Error {
 
 let revision = 0;
 const listeners = new Set<() => void>();
+const accessListeners = new Set<(status: number) => void>();
+export function subscribeAccessDenied(listener: (status: number) => void) {
+  accessListeners.add(listener);
+  return () => { accessListeners.delete(listener); };
+}
+function reportAccessDenied(path: string, status: number) {
+  if (!path.startsWith("/auth/") && (status === 401 || status === 403))
+    accessListeners.forEach((listener) => listener(status));
+}
 export function invalidateResources() {
   revision += 1;
   listeners.forEach((listener) => listener());
@@ -53,8 +62,10 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
         options.signal ?? undefined,
       ) as T;
     } catch (error) {
-      if (error instanceof browser.BrowserApiError)
+      if (error instanceof browser.BrowserApiError) {
+        reportAccessDenied(path, error.status);
         throw new ApiError(error.message, error.fields, error.status);
+      }
       throw error;
     }
   }
@@ -95,6 +106,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
           if (typeof value === "string") fields[key] = value;
       }
     }
+    reportAccessDenied(path, response.status);
     throw new ApiError(message, fields, response.status);
   }
   return response.json() as Promise<T>;
@@ -151,6 +163,7 @@ export function useResource<T>(path: string | null): Resource<T> {
           setState((previous) => ({
             ...previous,
             path,
+            data: error instanceof ApiError && [401, 403, 404].includes(error.status) ? undefined : previous.data,
             error:
               error instanceof Error
                 ? error

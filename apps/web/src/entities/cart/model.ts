@@ -383,10 +383,11 @@ export function decodeHistory(raw: string | null): number[] {
 export async function checkoutKey(
   cartId: string,
   body: Omit<CheckoutPayload, "request_key">,
+  accountId: number,
 ) {
   const hash = await crypto.subtle.digest(
     "SHA-256",
-    new TextEncoder().encode(JSON.stringify({ cartId, ...body })),
+    new TextEncoder().encode(JSON.stringify({ accountId, cartId, ...body })),
   );
   return [...new Uint8Array(hash)]
     .map((byte) => byte.toString(16).padStart(2, "0"))

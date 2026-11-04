@@ -1,7 +1,9 @@
 import { Controller, Get, Inject, Query } from "@nestjs/common";
 import { object } from "../common/validation.js";
 import { GeoService, queryCoordinates } from "./geo.service.js";
+import { Public } from '../auth/auth.guard.js';
 
+@Public()
 @Controller('api/geo')
 export class GeoController {
   constructor(@Inject(GeoService) private readonly service: GeoService) {}

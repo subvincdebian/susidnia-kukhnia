@@ -8,6 +8,7 @@ import { OrdersModule } from './orders/orders.module.js';
 import { ReviewsModule } from './reviews/reviews.module.js';
 import { AnalyticsModule } from './analytics/analytics.module.js';
 import { GeoModule } from './geo/geo.module.js';
+import { AuthModule } from './auth/auth.module.js';
 @Global()
 @Module({})
 class DatabaseModule {
@@ -18,6 +19,6 @@ class DatabaseModule {
 @Module({})
 export class AppModule {
   static register(connectionString: string): DynamicModule {
-    return {module:AppModule,imports:[DatabaseModule.register(connectionString),RestaurantsModule,CustomersModule,OrdersModule,ReviewsModule,AnalyticsModule,GeoModule],controllers:[AppController,CouriersController]};
+    return {module:AppModule,imports:[DatabaseModule.register(connectionString),AuthModule,RestaurantsModule,CustomersModule,OrdersModule,ReviewsModule,AnalyticsModule,GeoModule],controllers:[AppController,CouriersController]};
   }
 }

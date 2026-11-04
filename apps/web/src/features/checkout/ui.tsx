@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useCart, checkoutKey, decimal } from "../../entities/cart";
+import { useSession } from "../../entities/session";
 import type { CheckoutAttempt, CheckoutPayload } from "../../entities/cart";
 import { api, ApiError, invalidateResources } from "../../shared/api";
 import {
@@ -14,6 +15,7 @@ import { openPage, money, geoPoint } from "../../shared/lib";
 import { canReleaseAttempt } from "./model";
 
 export function CheckoutForm() {
+  const { user } = useSession();
   const {
     cart,
     catalog,
@@ -55,6 +57,7 @@ export function CheckoutForm() {
         return errors;
       }}
       onSubmit={async () => {
+        if (!user) throw new ApiError("Увійдіть до облікового запису", {}, 401);
         setSessionProblem(false);
         let active: CheckoutAttempt;
         if (attempt) active = attempt;
@@ -91,7 +94,7 @@ export function CheckoutForm() {
               .sort((a, b) => a.menu_item_id - b.menu_item_id),
           };
           active = {
-            body: { ...body, request_key: await checkoutKey(cart.id, body) },
+            body: { ...body, request_key: await checkoutKey(cart.id, body, user.id) },
             revision: cart.revision,
             restaurantName: catalog.data?.name ?? cart.restaurant.name,
             lines: resolved.lines.flatMap((line) =>
@@ -130,7 +133,7 @@ export function CheckoutForm() {
           ) {
             setSessionProblem(true);
             throw new ApiError(
-              "Сеанс оновився. Онови сторінку та перевір оформлення ще раз. Початкові дані збережено",
+              "Увійди знову до свого акаунта та перевір оформлення. Початкові дані збережено",
             );
           }
           throw new ApiError(
@@ -245,9 +248,7 @@ export function CheckoutForm() {
         <FieldError name="items" />
       </div>
       {sessionProblem && (
-        <button type="button" onClick={() => location.reload()}>
-          Оновити сторінку
-        </button>
+        <PageLink view="account" params={{ next: "view=checkout" }}>Увійти знову</PageLink>
       )}
       <p className="checkout-confirm-total">
         <span>Сума замовлення</span>

@@ -1,12 +1,13 @@
 import { Body, Controller, Get, HttpCode, Inject, Param, Patch, Post, Query } from '@nestjs/common';
 import { filters, integer } from '../common/validation.js';
 import { RestaurantsService } from './restaurants.service.js';
+import { Public } from '../auth/auth.guard.js';
 @Controller('api')
 export class RestaurantsController {
   constructor(@Inject(RestaurantsService) private readonly service: RestaurantsService) {}
-  @Get('restaurants') list(@Query() query: unknown) { return this.service.list(filters(query)); }
-  @Get('restaurants/map') map() { return this.service.map(); }
-  @Get('restaurants/:id') get(@Param('id') id: string) { return this.service.get(integer(Number(id),'id')); }
+  @Public() @Get('restaurants') list(@Query() query: unknown) { return this.service.list(filters(query)); }
+  @Public() @Get('restaurants/map') map() { return this.service.map(); }
+  @Public() @Get('restaurants/:id') get(@Param('id') id: string) { return this.service.get(integer(Number(id),'id')); }
   @Post('restaurants') @HttpCode(200) create(@Body() body: unknown) { return this.service.save(null,body); }
   @Patch('restaurants/:id') save(@Param('id') id: string,@Body() body: unknown) { return this.service.save(integer(Number(id),'id'),body); }
   @Post('menu') @HttpCode(200) createDish(@Body() body: unknown) { return this.service.saveDish(null,body); }

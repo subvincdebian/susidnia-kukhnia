@@ -33,9 +33,6 @@ import type {
 } from "./model";
 
 const CART_KEY = cartStorageKey;
-const CONTACT_KEY = "susidnia-kukhnia.contact.v1";
-const ATTEMPT_KEY = "susidnia-kukhnia.checkout.v1";
-const HISTORY_KEY = "susidnia-kukhnia.orders.v1";
 const read = (key: string, session = false) => {
   try {
     return (session ? sessionStorage : localStorage).getItem(key);
@@ -75,10 +72,13 @@ interface CartContextValue {
   finish: (id: number, revision: string) => void;
 }
 const CartContext = createContext<CartContextValue | null>(null);
-export function CartProvider({ children }: { children: ReactNode }) {
+export function CartProvider({ children, account }: { children: ReactNode; account: { id: number; full_name: string; phone: string } | null }) {
+  const CONTACT_KEY = `susidnia-kukhnia.contact.v2.${account?.id ?? "guest"}`;
+  const ATTEMPT_KEY = `susidnia-kukhnia.checkout.v2.${account?.id ?? "guest"}`;
+  const HISTORY_KEY = `susidnia-kukhnia.orders.v2.${account?.id ?? "guest"}`;
   const [cart, setCart] = useState(() => storedCart() ?? emptyCart());
   const [contact, changeContact] = useState(() =>
-    decodeContact(read(CONTACT_KEY, true)),
+    read(CONTACT_KEY, true) ? decodeContact(read(CONTACT_KEY, true)) : { ...decodeContact(null), full_name: account?.full_name ?? "", phone: account?.phone ?? "" },
   );
   const [attempt, setAttempt] = useState(() =>
     decodeAttempt(read(ATTEMPT_KEY, true)),

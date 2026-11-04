@@ -1,3 +1,4 @@
+import { loginDemo } from './auth-helpers.mjs';
 import { test, before, after } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
@@ -85,7 +86,7 @@ test("Порожня схема тотожна демонстраційній, �
     );
   assert.equal(
     (await db.query("SELECT COUNT(*) FROM _prisma_migrations")).rows[0].count,
-    "10",
+    "11",
   );
 });
 test("Імпорт атомарний, повторний імпорт не очищає жоден запис", async () => {
@@ -140,9 +141,7 @@ test("Нова база: авторизація кур’єра окрема в�
   });
   await app.listen(0, "127.0.0.1");
   base = await app.getUrl();
-  cookie = (await fetch(base + "/api/session")).headers
-    .get("set-cookie")
-    .split(";")[0];
+  cookie = (await loginDemo(base,forDatabase(runtime.config,name))).cookie;
   const courier = {
     full_name: "Контрольний кур’єр",
     phone: "+380000800002",

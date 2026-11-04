@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-import { useCart } from "../../entities/cart";
 import type { Order } from "../../entities/order";
 import { useResource } from "../../shared/api";
 import { money, dateTime } from "../../shared/lib";
@@ -15,10 +14,7 @@ type RecentOrder = Pick<
   | "payment_refunded_at"
 >;
 export function HistoryPage() {
-  const { history } = useCart();
-  const resource = useResource<RecentOrder[]>(
-    history.length ? `/orders/recent?ids=${history.join(",")}` : null,
-  );
+  const resource = useResource<RecentOrder[]>("/orders/recent");
   const active = resource.data?.some(
     (order) => !["доставлено", "скасовано"].includes(order.delivery_status),
   );
@@ -35,9 +31,8 @@ export function HistoryPage() {
         <div>
           <p className="home-eyebrow">Все під рукою</p>
           <h1 tabIndex={-1}>Мої замовлення</h1>
-          <p>Останні замовлення, оформлені в цьому браузері.</p>
+          <p>Останні 30 замовлень твого акаунта.</p>
         </div>
-        {history.length > 0 && (
           <button
             type="button"
             onClick={resource.retry}
@@ -45,19 +40,7 @@ export function HistoryPage() {
           >
             Оновити
           </button>
-        )}
       </header>
-      {!history.length ? (
-        <>
-          <Empty
-            title="Тут з’являться твої замовлення"
-            hint="Обери заклад і оформи перше замовлення"
-          />
-          <PageLink view="restaurants" className="shop-primary-link">
-            Обрати заклад →
-          </PageLink>
-        </>
-      ) : (
         <Async resource={resource} quiet>
           {(orders) =>
             orders.length ? (
@@ -93,8 +76,8 @@ export function HistoryPage() {
             ) : (
               <>
                 <Empty
-                  title="Ці замовлення вже недоступні"
-                  hint="Можеш обрати страви й оформити нове замовлення"
+                  title="Тут з’являться твої замовлення"
+                  hint="Обери заклад і оформи перше замовлення"
                 />
                 <PageLink view="restaurants" className="shop-primary-link">
                   Обрати заклад →
@@ -103,7 +86,6 @@ export function HistoryPage() {
             )
           }
         </Async>
-      )}
     </div>
   );
 }

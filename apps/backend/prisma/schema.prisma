@@ -54,7 +54,29 @@ model Customer {
   default_delivery_address String @db.VarChar(200)
   created_at DateTime @default(dbgenerated("CURRENT_TIMESTAMP")) @db.Timestamp(6)
   orders Order[]
+  app_user AppUser?
   @@map("customers")
+}
+model AppUser {
+  id Int @id @default(autoincrement())
+  customer_id Int @unique
+  email String @unique @db.VarChar(100)
+  password_hash String
+  role String @default("user") @db.VarChar(10)
+  created_at DateTime @default(dbgenerated("CURRENT_TIMESTAMP")) @db.Timestamp(6)
+  customer Customer @relation(fields:[customer_id],references:[id],onDelete:Restrict,onUpdate:NoAction)
+  sessions AuthSession[]
+  @@map("app_users")
+}
+model AuthSession {
+  token_hash String @id @db.VarChar(64)
+  user_id Int
+  created_at DateTime @default(dbgenerated("CURRENT_TIMESTAMP")) @db.Timestamptz(6)
+  expires_at DateTime @db.Timestamptz(6)
+  user AppUser @relation(fields:[user_id],references:[id],onDelete:Cascade,onUpdate:NoAction)
+  @@index([user_id],map:"idx_auth_sessions_user")
+  @@index([expires_at],map:"idx_auth_sessions_expiry")
+  @@map("auth_sessions")
 }
 model Courier {
   id Int @id @default(autoincrement())

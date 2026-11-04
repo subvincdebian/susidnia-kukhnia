@@ -2,6 +2,7 @@ import { catalogDatabase } from './catalog.mjs';
 import { connectionString } from './migrations.mjs';
 import { build } from './runtime.mjs';
 import { seedDemoDatabase } from './demo.mjs';
+import { seedAuthDatabase } from './auth.mjs';
 let database,app,closing=false;
 async function stop() {
   if(closing)return;closing=true;
@@ -12,6 +13,7 @@ process.once('SIGTERM',()=>stop().then(()=>process.exit(0)));
 try {
   await build();database=await catalogDatabase();
   await seedDemoDatabase(database.config);
+  await seedAuthDatabase(database.config);
   const {createApplication}=await import('../apps/backend/dist/application.js');
   app=await createApplication({connectionString:connectionString(database.config),devOrigin:process.env.DELIVERY_DEV==='1'?'http://127.0.0.1:5173':undefined});
   await app.listen(Number(process.env.PORT??3000),'127.0.0.1');

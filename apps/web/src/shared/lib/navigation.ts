@@ -32,7 +32,7 @@ export function pageHref(
   return `${import.meta.env?.BASE_URL ?? "/"}${query.size ? "?" + query.toString() : ""}`;
 }
 export const isShopView = (view: string) =>
-  ["home", "restaurants", "menu", "checkout", "order", "history"].includes(
+  ["home", "restaurants", "menu", "checkout", "order", "history", "account"].includes(
     view,
   );
 export function openPage(
@@ -50,6 +50,7 @@ export function openPage(
     from: null,
     to: null,
     display: null,
+    next: null,
     ...params,
   });
   window.scrollTo(0, 0);

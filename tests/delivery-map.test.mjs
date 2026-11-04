@@ -1,3 +1,4 @@
+import { loginDemo } from './auth-helpers.mjs';
 import { test, before, after } from 'node:test';
 import assert from 'node:assert/strict';
 import { createHash } from 'node:crypto';
@@ -30,7 +31,7 @@ before(async () => {
   orders = app.get(OrdersService);
   restaurants = app.get(RestaurantsService);
   base = await app.getUrl();
-  cookie = (await fetch(base+'/api/session')).headers.get('set-cookie').split(';')[0];
+  cookie = (await loginDemo(base,config)).cookie;
 });
 after(async () => {
   if (app) await app.close();
@@ -41,6 +42,7 @@ after(async () => {
   }
   runtime?.stop();
 });
+const checkout = input => orders.checkout(input,customer);
 const draft = (extra={}) => ({customer_id:customer,restaurant_id:dish.restaurant_id,delivery_address:'Демонстраційна адреса, 1',delivery_note:'',items:[{menu_item_id:dish.id,quantity:1}],...extra});
 const checkoutDraft = (extra={}) => {
   sequence++;
@@ -137,13 +139,13 @@ test('checkout: хеш до міграції не змінюється без к
   };
   const hash = createHash('sha256').update(JSON.stringify(oldPayload)).digest('hex');
   await pool.query('INSERT INTO _checkout_requests(request_key,request_hash,order_id) VALUES($1,$2,1)',[input.request_key,hash]);
-  assert.deepEqual(await orders.checkout(input),{id:1});
-  await assert.rejects(orders.checkout({...input,delivery_latitude:50.45,delivery_longitude:30.52}),rejectStatus(409));
+  assert.deepEqual(await checkout(input),{id:1});
+  await assert.rejects(checkout({...input,delivery_latitude:50.45,delivery_longitude:30.52}),rejectStatus(409));
   const positioned = checkoutDraft({delivery_latitude:50.451,delivery_longitude:30.524});
-  const first = await orders.checkout(positioned);
-  assert.deepEqual(await orders.checkout(positioned),first);
+  const first = await checkout(positioned);
+  assert.deepEqual(await checkout(positioned),first);
   assert.equal((await orders.get(first.id)).delivery_latitude,50.451);
-  await assert.rejects(orders.checkout({...positioned,delivery_longitude:30.525}),rejectStatus(409));
+  await assert.rejects(checkout({...positioned,delivery_longitude:30.525}),rejectStatus(409));
 });
 
 test('address: створено й готується, версія захищає від втрати змін, текст без позиції очищає старі координати',async () => {

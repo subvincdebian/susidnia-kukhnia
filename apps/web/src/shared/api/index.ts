@@ -1,2 +1,2 @@
-export { api, ApiError, invalidateResources, useResource } from "./resource";
+export { api, ApiError, invalidateResources, subscribeAccessDenied, useResource } from "./resource";
 export type { Resource } from "./resource";

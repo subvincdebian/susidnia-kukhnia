@@ -88,48 +88,34 @@ export class OrdersService {
       { maxWait: 10000, timeout: 15000 },
     );
   }
-  checkout(input: unknown) {
+  checkout(input: unknown, customer: number) {
+    integer(customer, 'customer_id');
     const { requestKey, ...data } = checkoutInput(input);
     const hash = createHash("sha256")
-      .update(JSON.stringify(data))
+      .update(JSON.stringify({customer_id:customer,...data}))
       .digest("hex");
+    const legacyHash = createHash('sha256').update(JSON.stringify(data)).digest('hex');
     return this.db.$transaction(
       async (tx) => {
         await tx.$executeRaw`INSERT INTO _checkout_requests(request_key, request_hash) VALUES (${requestKey}, ${hash}) ON CONFLICT (request_key) DO NOTHING`;
         const [request] = await tx.$queryRaw<
           { request_hash: string; order_id: number | null }[]
         >`SELECT request_hash, order_id FROM _checkout_requests WHERE request_key=${requestKey} FOR UPDATE`;
-        if (!request || request.request_hash !== hash)
+        const replayOwned = request && request.order_id !== null && Boolean(await tx.order.findFirst({where:{id:request.order_id,customer_id:customer},select:{id:true}}));
+        const legacyOwned = request?.request_hash === legacyHash && replayOwned;
+        if (!request || (request.request_hash !== hash && !legacyOwned))
           throw new HttpError(
             409,
             "Цей запит уже використано для іншого замовлення. Перевірте історію замовлень",
             { request_key: "Початковий запит уже збережено" },
           );
-        if (request.order_id !== null) return { id: request.order_id };
-        const digits = data.phone.slice(1);
-        const localDigits = /^380\d{9}$/.test(digits)
-          ? digits.slice(2)
-          : digits;
-        const existing = await tx.$queryRaw<
-          { id: number }[]
-        >`SELECT id FROM customers WHERE regexp_replace(phone, '[^0-9]', '', 'g') IN (${digits}, ${localDigits}) ORDER BY id LIMIT 1`;
-        let customer = existing[0];
-        if (!customer) {
-          await tx.$executeRaw`INSERT INTO customers(full_name,email,phone,default_delivery_address) VALUES (${data.fullName},NULL,${data.phone},${data.address}) ON CONFLICT (phone) DO NOTHING`;
-          const found = await tx.customer.findUnique({
-            where: { phone: data.phone },
-            select: { id: true },
-          });
-          if (!found)
-            throw new HttpError(
-              409,
-              "Не вдалося зберегти контакт. Повторіть оформлення",
-            );
-          customer = found;
+        if (request.order_id !== null) {
+          if (!replayOwned) throw new HttpError(409,'Цей запит уже використано. Перевірте власну історію замовлень');
+          return { id: request.order_id };
         }
         const order = await this.persistOrder(
           tx,
-          customer.id,
+          customer,
           data,
           { name: data.fullName, phone: data.phone },
           data.expectedTotal,
@@ -143,13 +129,12 @@ export class OrdersService {
       { maxWait: 10000, timeout: 15000 },
     );
   }
-  async recent(ids: number[]) {
-    if (!ids.length) return [];
+  async recent(ids: number[], customer: number) {
     return this.db
       .$queryRaw(Prisma.sql`SELECT o.id,o.order_date,o.delivery_status,o.total_amount,r.name AS restaurant,
       p.method AS payment_method,p.refunded_at AS payment_refunded_at
       FROM orders o JOIN restaurants r ON r.id=o.restaurant_id LEFT JOIN payments p ON p.order_id=o.id
-      WHERE o.id IN (${Prisma.join(ids)}) ORDER BY o.order_date DESC,o.id DESC`);
+      WHERE o.customer_id=${customer} ${ids.length ? Prisma.sql`AND o.id IN (${Prisma.join(ids)})` : Prisma.empty} ORDER BY o.order_date DESC,o.id DESC LIMIT 30`);
   }
   private async persistOrder(
     tx: Prisma.TransactionClient,
@@ -363,8 +348,7 @@ export class OrdersService {
     const courier = sender === 'courier' ? integer(b.courier_id,"courier_id") : undefined;
     return this.db.$transaction(async (tx) => {
       const old = await this.lockOrder(tx,id);
-      // The local operator chooses the sender. Courier ID still has to match
-      // this order; it is not a substitute for the local session boundary.
+      // The controller permits courier messages only for authenticated admins.
       if (courier !== undefined && old.courier_id !== courier)
         throw new HttpError(409,"Цей кур'єр не виконує замовлення");
       const existing = await tx.deliveryMessage.findUnique({

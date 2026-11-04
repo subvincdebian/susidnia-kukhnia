@@ -6,7 +6,7 @@ import { createHash } from "node:crypto";
 import { pathToFileURL } from "node:url";
 import { Worker as NodeWorker } from "node:worker_threads";
 import { createBrowserApi, BrowserApiError } from "../apps/web/src/shared/api/browser/core.ts";
-import { initializeDatabase, isInitialized, parseSeed } from "../apps/web/src/shared/api/browser/initialize.ts";
+import { initializeDatabase, isInitialized, parseSeed, schemaVersion } from "../apps/web/src/shared/api/browser/initialize.ts";
 import { checkoutInput } from "../apps/web/src/shared/api/browser/validation.ts";
 import { openDatabaseWorker } from "../apps/web/src/shared/api/browser/worker-startup.ts";
 import { parseKyivTimestamp } from "../apps/web/src/shared/api/browser/timestamps.ts";
@@ -69,6 +69,7 @@ before(async () => {
   db = await PGlite.create();
   await initializeDatabase(db, schema, seed);
   api = createBrowserApi(db);
+  await api.request("/auth/login", "POST", { email: "admin@demo.test", password: "AdminDemo2026!" });
   dish = (await db.query(`SELECT m.id,m.restaurant_id,m.price FROM menu_items m JOIN restaurants r ON r.id=m.restaurant_id
     WHERE m.is_available AND r.is_active ORDER BY m.id LIMIT 1`)).rows[0];
 });
@@ -108,12 +109,12 @@ test("a failed first initialization rolls back schema, seed and marker", async (
   const empty = await PGlite.create();
   try {
     await assert.rejects(initializeDatabase(empty, "CREATE TABLE atomic_seed(id integer PRIMARY KEY)", {
-      schemaVersion: 1,
+      schemaVersion,
       statements: [{ sql: "INSERT INTO atomic_seed VALUES($1)", params: [1] }, { sql: "SELECT missing_column FROM atomic_seed", params: [] }],
     }));
     assert.equal(await isInitialized(empty), false);
     assert.equal((await empty.query("SELECT to_regclass('atomic_seed') AS table_name")).rows[0].table_name, null);
-    await initializeDatabase(empty, "CREATE TABLE atomic_seed(id integer PRIMARY KEY)", { schemaVersion: 1, statements: [{ sql: "INSERT INTO atomic_seed VALUES($1)", params: [2] }] });
+    await initializeDatabase(empty, "CREATE TABLE atomic_seed(id integer PRIMARY KEY)", { schemaVersion, statements: [{ sql: "INSERT INTO atomic_seed VALUES($1)", params: [2] }] });
     assert.equal((await empty.query("SELECT id FROM atomic_seed")).rows[0].id, 2);
   } finally { await empty.close(); }
 });
@@ -130,12 +131,12 @@ test("checkout retries, canonical hashes, recipient snapshots and failed writes 
   assert.equal(order.items[0].unit_price, dish.price);
   const { requestKey, ...canonical } = checkoutInput(input);
   const stored = (await db.query("SELECT request_hash FROM _checkout_requests WHERE request_key=$1", [requestKey])).rows[0];
-  assert.equal(stored.request_hash, createHash("sha256").update(JSON.stringify(canonical)).digest("hex"));
+  assert.equal(stored.request_hash, createHash("sha256").update(JSON.stringify({ ...canonical, customer_id: order.customer_id })).digest("hex"));
   await assert.rejects(request("/orders/checkout", "POST", { ...input, delivery_note: "Інше прохання" }), errorStatus(409));
   const second = await createOrder({ phone: input.phone, full_name: "Інший одержувач" });
   const secondOrder = await request(`/orders/${second.id}`);
   assert.equal(secondOrder.customer_id, order.customer_id);
-  assert.equal(secondOrder.customer, input.full_name);
+  assert.equal(secondOrder.customer, (await request("/auth/session")).user.full_name);
   assert.equal(secondOrder.recipient_name, "Інший одержувач");
   const failed = checkout({ expected_total: "0.01" });
   await assert.rejects(request("/orders/checkout", "POST", failed), errorStatus(409));
@@ -290,7 +291,7 @@ test("worker startup errors and stalled initialization reject, clean up and allo
   const worker = new BrowserWorker();
   const client = await openDatabaseWorker(worker, workerOptions(id), 15000);
   try {
-    assert.equal(Number((await createBrowserApi(client).request("/bootstrap")).counts.restaurants), 10);
+    assert.equal((await createBrowserApi(client).request("/bootstrap")).restaurants.length, 10);
   } finally { await client.close(); await worker.exited; }
 });
 
@@ -303,6 +304,7 @@ test("real worker RPC retains constraint status, serves late followers and decod
     client = await openDatabaseWorker(worker, workerOptions(id), 15000);
     assert.equal(client.isLeader, true);
     const workerApi = createBrowserApi(client);
+    await workerApi.request("/auth/login", "POST", { email: "admin@demo.test", password: "AdminDemo2026!" });
     const customer = { full_name: "Гість worker", email: "worker@example.test", phone: "+380000999891", default_delivery_address: "Київ, Поділ, 1" };
     await workerApi.request("/customers", "POST", customer);
     await assert.rejects(workerApi.request("/customers", "POST", customer), errorStatus(409));
@@ -324,7 +326,9 @@ test("real worker RPC retains constraint status, serves late followers and decod
     followerWorker = new BrowserWorker();
     follower = await openDatabaseWorker(followerWorker, workerOptions(id), 15000);
     assert.equal(follower.isLeader, false);
-    const shared = await createBrowserApi(follower).request("/customers?q=worker%40example.test");
+    const followerApi = createBrowserApi(follower);
+    await followerApi.request("/auth/login", "POST", { email: "admin@demo.test", password: "AdminDemo2026!" });
+    const shared = await followerApi.request("/customers?q=worker%40example.test");
     assert.equal(shared.items[0].email, customer.email);
   } finally {
     if (follower) await follower.close();

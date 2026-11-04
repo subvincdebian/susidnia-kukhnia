@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import type { ReactNode } from "react";
+import { useSession } from "../../entities/session";
 import { isShopView } from "../../shared/lib";
 import { PageLink } from "../../shared/ui";
 import { managementGroups, managementLinks, managementOverview } from "./model";
@@ -43,7 +44,10 @@ export function Shell({
   cartTrigger?: ReactNode;
   hasCart?: boolean;
 }) {
-  const shop = isShopView(view);
+  const { user } = useSession();
+  const isAdmin = user?.role === "admin";
+  const shop = isShopView(view) || !isAdmin;
+  const accountLink = <PageLink view="account" className="account-trigger" current={view === "account"} label={user ? `Акаунт: ${user.full_name}` : "Увійти до акаунта"}><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" aria-hidden="true"><circle cx="12" cy="8" r="3.5" /><path d="M5 21v-2a7 7 0 0 1 14 0v2" /></svg><span>{user ? "Акаунт" : "Увійти"}</span></PageLink>;
   const currentSection = managementLinks.find((item) => item.view === (view === "courier-delivery" ? "couriers" : view));
   const management = useRef<HTMLDetailsElement>(null);
   useEffect(() => {
@@ -113,8 +117,9 @@ export function Shell({
                 </svg>
                 Київ
               </span>
+              {accountLink}
               {cartTrigger}
-              <details
+              {isAdmin && <details
                 ref={management}
                 className="home-manage"
                 onKeyDown={(event) => {
@@ -151,12 +156,13 @@ export function Shell({
                   </svg>
                 </summary>
                 <ManagementNavigation view={view} />
-              </details>
+              </details>}
             </div>
           </>
         ) : (
           <div className="workspace-header-actions">
             <span className="local-label">Керування доставкою</span>
+            {accountLink}
             <PageLink
               view="restaurants"
               className="workspace-store-link"

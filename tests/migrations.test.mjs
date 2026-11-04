@@ -8,6 +8,7 @@ import { localDatabase, root } from "../scripts/database.mjs";
 import { migrate, prisma } from "../scripts/migrations.mjs";
 import { schemaSignature } from "../scripts/schema-signature.mjs";
 async function revertLatest(db) {
+  await db.query("DROP TABLE auth_sessions;DROP TABLE app_users");
   await db.query(
     "DROP TABLE delivery_messages;DROP FUNCTION guard_delivery_message();DROP TRIGGER order_address_guard ON orders;DROP FUNCTION guard_order_address();DROP TRIGGER order_courier_location_guard ON orders;DROP FUNCTION guard_courier_location();ALTER TABLE restaurants DROP COLUMN latitude,DROP COLUMN longitude,DROP COLUMN coordinate_source;ALTER TABLE orders DROP COLUMN delivery_latitude,DROP COLUMN delivery_longitude,DROP COLUMN address_version,DROP COLUMN courier_latitude,DROP COLUMN courier_longitude,DROP COLUMN courier_location_at,DROP COLUMN courier_location_source",
   );
@@ -265,7 +266,7 @@ test("Перервана реєстрація старої схеми продо
     await migrate(config);
     assert.equal(
       (await db.query("SELECT COUNT(*) FROM _prisma_migrations")).rows[0].count,
-      "10",
+      "11",
     );
     await revertLatest(db);
     await db.query(

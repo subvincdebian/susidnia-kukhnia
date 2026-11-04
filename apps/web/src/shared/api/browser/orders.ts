@@ -54,15 +54,14 @@ export function createOrders(db: PGliteInterface) {
         WHERE ($1='' OR o.delivery_status=$1) AND (c.full_name ILIKE $2 OR r.name ILIKE $2 OR o.id::text ILIKE $2)
         ORDER BY o.order_date DESC,o.id DESC`, [status, "%" + q + "%"], requestedPage);
     },
-    recent(query: Record<string, unknown>) {
+    recent(query: Record<string, unknown>, customerId: number) {
       const raw = text(query.ids ?? "", "ids", 360, 0);
-      if (!raw) return [];
-      const values = raw.split(",");
+      const values = raw ? raw.split(",") : [];
       if (values.length > 30 || values.some((value) => !/^\d+$/.test(value))) fail(400, "Некоректний список замовлень");
       const ids = [...new Set(values.map((value) => integer(Number(value), "ids")))];
       return rows(db, `SELECT o.id,o.order_date,o.delivery_status,o.total_amount,r.name AS restaurant,p.method AS payment_method,p.refunded_at AS payment_refunded_at
         FROM orders o JOIN restaurants r ON r.id=o.restaurant_id LEFT JOIN payments p ON p.order_id=o.id
-        WHERE o.id=ANY($1::integer[]) ORDER BY o.order_date DESC,o.id DESC`, [ids]);
+        WHERE ($1::integer[] IS NULL OR o.id=ANY($1::integer[])) AND o.customer_id=$2 ORDER BY o.order_date DESC,o.id DESC LIMIT 30`, [ids.length ? ids : null, customerId]);
     },
     async get(id: number) {
       const order = await one<OrderRow>(db, `SELECT o.*,c.full_name AS customer,c.phone AS customer_phone,r.name AS restaurant,
@@ -79,23 +78,19 @@ export function createOrders(db: PGliteInterface) {
       const body = object(input), customer = integer(body.customer_id, "customer_id"), order = orderInput(body);
       return db.transaction((tx) => persistOrder(tx, customer, order));
     },
-    async checkout(input: unknown) {
+    async checkout(input: unknown, customerId: number) {
       const { requestKey, ...data } = checkoutInput(input);
-      const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(JSON.stringify(data)));
+      const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(JSON.stringify({ ...data, customer_id: customerId })));
       const hash = Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
       return db.transaction(async (tx) => {
         await tx.query("INSERT INTO _checkout_requests(request_key,request_hash) VALUES($1,$2) ON CONFLICT(request_key) DO NOTHING", [requestKey, hash]);
         const request = await one<{ request_hash: string; order_id: number | null }>(tx, "SELECT request_hash,order_id FROM _checkout_requests WHERE request_key=$1 FOR UPDATE", [requestKey]);
+        if (request.order_id !== null && !(await rows(tx, "SELECT id FROM orders WHERE id=$1 AND customer_id=$2", [request.order_id, customerId])).length)
+          fail(404, "Замовлення не знайдено");
         if (request.request_hash !== hash)
           fail(409, "Цей запит уже використано для іншого замовлення. Перевірте історію замовлень", { request_key: "Початковий запит уже збережено" });
         if (request.order_id !== null) return { id: request.order_id };
-        const digits = data.phone.slice(1), localDigits = /^380\d{9}$/.test(digits) ? digits.slice(2) : digits;
-        let [customer] = await rows<{ id: number }>(tx, "SELECT id FROM customers WHERE regexp_replace(phone,'[^0-9]','','g') IN ($1,$2) ORDER BY id LIMIT 1", [digits, localDigits]);
-        if (!customer) {
-          await tx.query("INSERT INTO customers(full_name,email,phone,default_delivery_address) VALUES($1,NULL,$2,$3) ON CONFLICT(phone) DO NOTHING", [data.fullName, data.phone, data.address]);
-          customer = await one<{ id: number }>(tx, "SELECT id FROM customers WHERE phone=$1", [data.phone]);
-        }
-        const order = await persistOrder(tx, customer.id, data, { name: data.fullName, phone: data.phone }, data.expectedTotal);
+        const order = await persistOrder(tx, customerId, data, { name: data.fullName, phone: data.phone }, data.expectedTotal);
         await tx.query("UPDATE _checkout_requests SET order_id=$1 WHERE request_key=$2", [order.id, requestKey]);
         return { id: order.id };
       });

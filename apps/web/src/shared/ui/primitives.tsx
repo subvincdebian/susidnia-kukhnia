@@ -8,6 +8,8 @@ import {
 } from "react";
 import type { ReactNode } from "react";
 import type { Resource } from "../api";
+import { ApiError } from "../api";
+import { PageLink } from "./page-link";
 
 export function Heading({
   title,
@@ -55,14 +57,16 @@ export function Async<T>({
   quiet?: boolean;
 }) {
   if (!resource.data) {
-    if (resource.error)
+    if (resource.error) {
+      const status = resource.error instanceof ApiError ? resource.error.status : 0;
       return (
         <div className="state" role="alert">
-          <h2>Не вдалося завантажити дані</h2>
+          <h2>{status === 401 ? "Потрібно ввійти до акаунта" : status === 403 ? "Доступ обмежено" : status === 404 ? "Запис недоступний" : "Не вдалося завантажити дані"}</h2>
           <p>{resource.error.message}</p>
-          <button onClick={resource.retry}>Повторити</button>
+          {[401, 403].includes(status) ? <div className="actions"><PageLink view="account" params={{ next: window.location.search.slice(1) }}>Переглянути акаунт</PageLink><PageLink view="restaurants">До закладів</PageLink></div> : status === 404 ? <PageLink view="history">До моїх замовлень</PageLink> : <button onClick={resource.retry}>Повторити</button>}
         </div>
       );
+    }
     return (
       <div className="state" role="status">
         Завантаження даних...

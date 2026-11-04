@@ -1,3 +1,4 @@
+import { loginDemo } from './auth-helpers.mjs';
 import { test, before, after } from "node:test";
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
@@ -16,6 +17,7 @@ let runtime,
   base,
   cookie,
   dish,
+  customer,
   sequence = 0;
 const database = `delivery_test_${process.pid}_${Date.now()}`;
 before(async () => {
@@ -35,9 +37,8 @@ before(async () => {
   await app.listen(0, "127.0.0.1");
   orders = app.get(OrdersService);
   base = await app.getUrl();
-  cookie = (await fetch(base + "/api/session")).headers
-    .get("set-cookie")
-    .split(";")[0];
+  const session = await loginDemo(base,config);
+  cookie = session.cookie;customer = session.user.customer_id;
 });
 after(async () => {
   if (app) await app.close();
@@ -49,6 +50,7 @@ after(async () => {
   }
   runtime?.stop();
 });
+const checkout = input => orders.checkout(input,customer);
 const draft = (extra = {}) => {
   sequence++;
   return {
@@ -83,12 +85,12 @@ const counts = async () => {
 test("checkout: повтор після втрати відповіді повертає те саме замовлення навіть після зміни меню", async () => {
   const input = draft(),
     before = await counts();
-  const first = await orders.checkout(input);
+  const first = await checkout(input);
   await pool.query("UPDATE menu_items SET price=price+1 WHERE id=$1", [
     dish.id,
   ]);
   try {
-    assert.deepEqual(await orders.checkout(input), first);
+    assert.deepEqual(await checkout(input), first);
   } finally {
     await pool.query("UPDATE menu_items SET price=$2 WHERE id=$1", [
       dish.id,
@@ -97,15 +99,7 @@ test("checkout: повтор після втрати відповіді пове
   }
   const after = await counts();
   for (const table of Object.keys(before))
-    assert.equal(after[table] - before[table], 1, table);
-  assert.equal(
-    (
-      await pool.query("SELECT email FROM customers WHERE phone=$1", [
-        input.phone,
-      ])
-    ).rows[0].email,
-    null,
-  );
+    assert.equal(after[table] - before[table], table === "customers" ? 0 : 1, table);
   const order = await orders.get(first.id);
   assert.equal(order.payment.method, "картка");
   assert.equal(order.recipient_name, input.full_name);
@@ -114,14 +108,14 @@ test("checkout: одночасні повтори створюють один к
   const input = draft(),
     before = await counts();
   const results = await Promise.all([
-    orders.checkout(input),
-    orders.checkout(input),
-    orders.checkout(input),
+    checkout(input),
+    checkout(input),
+    checkout(input),
   ]);
   assert.equal(new Set(results.map((item) => item.id)).size, 1);
   const after = await counts();
   for (const table of Object.keys(before))
-    assert.equal(after[table] - before[table], 1, table);
+    assert.equal(after[table] - before[table], table === "customers" ? 0 : 1, table);
   assert.equal(
     (
       await pool.query(
@@ -133,10 +127,10 @@ test("checkout: одночасні повтори створюють один к
 });
 test("checkout: інший payload з тим самим ключем відхиляється без змін", async () => {
   const input = draft();
-  await orders.checkout(input);
+  await checkout(input);
   const before = await counts();
   await assert.rejects(
-    orders.checkout({ ...input, delivery_address: "Інша демонстраційна адреса" }),
+    checkout({ ...input, delivery_address: "Інша демонстраційна адреса" }),
     (error) => error.status === 409,
   );
   assert.deepEqual(await counts(), before);
@@ -145,7 +139,7 @@ test("checkout: недоступна страва й змінена сума н�
   const input = draft(),
     before = await counts();
   await assert.rejects(
-    orders.checkout({
+    checkout({
       ...input,
       items: [...input.items, { menu_item_id: 2147483647, quantity: 1 }],
     }),
@@ -153,7 +147,7 @@ test("checkout: недоступна страва й змінена сума н�
   );
   assert.deepEqual(await counts(), before);
   await assert.rejects(
-    orders.checkout({ ...input, expected_total: "0.01" }),
+    checkout({ ...input, expected_total: "0.01" }),
     (error) => error.status === 409,
   );
   assert.deepEqual(await counts(), before);
@@ -165,7 +159,7 @@ test("checkout: помилка після платежу відкочує вес
     "CREATE FUNCTION checkout_test_failure() RETURNS trigger AS $$ BEGIN RAISE EXCEPTION 'test failure'; END; $$ LANGUAGE plpgsql; CREATE TRIGGER checkout_test_failure BEFORE UPDATE ON _checkout_requests FOR EACH ROW EXECUTE FUNCTION checkout_test_failure()",
   );
   try {
-    await assert.rejects(orders.checkout(input));
+    await assert.rejects(checkout(input));
   } finally {
     await pool.query(
       "DROP TRIGGER checkout_test_failure ON _checkout_requests;DROP FUNCTION checkout_test_failure()",
@@ -173,25 +167,25 @@ test("checkout: помилка після платежу відкочує вес
   }
   assert.deepEqual(await counts(), before);
 });
-test("checkout: повторний телефон не переписує CRM, одержувач зберігається окремо", async () => {
-  const customer = (
+test("checkout: телефон іншого контакту не привласнює його історію, одержувач зберігається окремо", async () => {
+  const previousCustomer = (
     await pool.query("SELECT * FROM customers ORDER BY id LIMIT 1")
   ).rows[0];
   const input = draft({
-    phone: customer.phone,
+    phone: previousCustomer.phone,
     full_name: "Інший одержувач доставки",
     delivery_address: "Інша адреса одержувача",
   });
-  const created = await orders.checkout(input),
+  const created = await checkout(input),
     order = await orders.get(created.id);
-  assert.equal(order.customer_id, customer.id);
-  assert.equal(order.customer, customer.full_name);
+  assert.equal(order.customer_id, customer);
+  assert.notEqual(order.customer_id, previousCustomer.id);
   assert.equal(order.recipient_name, input.full_name);
   assert.equal(order.delivery_address, input.delivery_address);
   assert.deepEqual(
-    (await pool.query("SELECT * FROM customers WHERE id=$1", [customer.id]))
+    (await pool.query("SELECT * FROM customers WHERE id=$1", [previousCustomer.id]))
       .rows[0],
-    customer,
+    previousCustomer,
   );
   await assert.rejects(
     pool.query("UPDATE orders SET recipient_name='Змінено' WHERE id=$1", [
@@ -200,17 +194,17 @@ test("checkout: повторний телефон не переписує CRM, �
     (error) => error.code === "23514",
   );
 });
-test("checkout: різні запити з одним новим телефоном не дублюють контакт", async () => {
+test("checkout: різні запити з одним телефоном лишаються в поточному акаунті", async () => {
   const first = draft(),
     second = draft({ phone: first.phone }),
     before = await counts();
   const results = await Promise.all([
-    orders.checkout(first),
-    orders.checkout(second),
+    checkout(first),
+    checkout(second),
   ]);
   assert.notEqual(results[0].id, results[1].id);
   const after = await counts();
-  assert.equal(after.customers - before.customers, 1);
+  assert.equal(after.customers - before.customers, 0);
   assert.equal(after.orders - before.orders, 2);
 });
 test("checkout: HTTP авторизація окрема від валідації, recent повертає тільки запитані ID", async () => {
@@ -246,8 +240,7 @@ test("checkout: HTTP авторизація окрема від валідаці
   );
   assert.equal(contacts.status, 200);
   const customerPage = await contacts.json();
-  assert.equal(customerPage.total, 1);
-  assert.equal(customerPage.items[0].email, null);
+  assert.equal(customerPage.total, 0);
   assert.equal(
     (
       await fetch(base + "/api/orders/recent?ids=1%3BDELETE", {

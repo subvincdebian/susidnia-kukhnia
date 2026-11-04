@@ -5,6 +5,7 @@ import {PGlite} from '@electric-sql/pglite';
 import {importEmptyCatalog} from './catalog.mjs';
 import {readLocations,appendLocations} from './locations.mjs';
 import {applyDemoData} from './demo.mjs';
+import {seedAuth,authSeedStatements} from './auth.mjs';
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const output=path.join(root,'apps/web/public/demo');
@@ -34,10 +35,13 @@ try{
   await importEmptyCatalog(client,catalog);
   await appendLocations(client,await readLocations());
   const result=await applyDemoData(client,demo);
+  await seedAuth(client);
   const counts=(await db.query('SELECT (SELECT COUNT(*) FROM restaurants)::integer AS restaurants,(SELECT COUNT(*) FROM menu_items)::integer AS dishes,(SELECT COUNT(*) FROM orders)::integer AS orders')).rows[0];
   if(counts.restaurants!==10||counts.dishes!==318||counts.orders!==30)throw new Error('Unexpected demo catalog counts');
   await fs.mkdir(output,{recursive:true});
   await fs.writeFile(path.join(output,'schema.sql'),schema+'\n');
-  await fs.writeFile(path.join(output,'seed.json'),JSON.stringify({schemaVersion:1,createdAt:new Date().toISOString(),statements}));
+  const upgradeSchema=(await fs.readFile(path.join(migrationRoot,'202611040015_auth_roles/migration.sql'),'utf8')).replace(/^\s*(?:BEGIN|COMMIT);\s*$/gm,'');
+  await fs.writeFile(path.join(output,'seed.json'),JSON.stringify({schemaVersion:2,createdAt:new Date().toISOString(),statements,
+    upgrade:{fromVersion:1,schema:upgradeSchema,statements:authSeedStatements}}));
   console.log(JSON.stringify({browserDemo:counts,statements:statements.length,orders:result.summary.orders}));
 }finally{await db.close();}

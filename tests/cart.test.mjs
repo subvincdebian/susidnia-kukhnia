@@ -156,12 +156,13 @@ test("cart: завершений кошик не повертається піс
 });
 test("checkout draft: повтор зберігає ключ і початковий payload після перезавантаження", async () => {
   const cart = one(),
-    key = await checkoutKey(cart.id, payload);
+    key = await checkoutKey(cart.id, payload, 1);
   assert.equal(
-    await checkoutKey(cart.id, JSON.parse(JSON.stringify(payload))),
+    await checkoutKey(cart.id, JSON.parse(JSON.stringify(payload)), 1),
     key,
   );
-  assert.notEqual(await checkoutKey(emptyCart().id, payload), key);
+  assert.notEqual(await checkoutKey(emptyCart().id, payload, 1), key);
+  assert.notEqual(await checkoutKey(cart.id, payload, 2), key);
   const attempt = {
     body: { ...payload, request_key: key },
     revision: cart.revision,

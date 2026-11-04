@@ -54,6 +54,7 @@ export function Field({
 }: FieldProps) {
   const errors = useContext(ErrorsContext);
   const error = explicitError ?? errors[name];
+  const [passwordVisible, setPasswordVisible] = useState(false);
   const area = useRef<HTMLTextAreaElement>(null);
   const grow = () => {
     if (area.current) {
@@ -101,6 +102,13 @@ export function Field({
           maxLength={maxLength}
           className="resize-none"
         />
+      ) : type === "password" ? (
+        <div className="password-field">
+          <input {...common} type={passwordVisible ? "text" : "password"} maxLength={maxLength} autoComplete={autoComplete} />
+          <button type="button" aria-label={passwordVisible ? "Приховати пароль" : "Показати пароль"} aria-pressed={passwordVisible} onClick={() => setPasswordVisible((visible) => !visible)}>
+            {passwordVisible ? "Приховати" : "Показати"}
+          </button>
+        </div>
       ) : (
         <input
           {...common}
@@ -186,12 +194,15 @@ export function AppForm<T>({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [message, setMessage] = useState("");
   const ref = useRef<HTMLFormElement>(null);
+  const active = useRef(true);
   const errorId = useId();
   useEffect(() => {
+    active.current = true;
     if (modal)
       ref.current
         ?.querySelector<HTMLElement>("input, select, textarea, button")
         ?.focus();
+    return () => { active.current = false; };
   }, []);
   function focusError(fields: Record<string, string>) {
     setErrors(fields);
@@ -253,9 +264,11 @@ export function AppForm<T>({
           modal?.setBusy(true);
           try {
             const result = await onSubmit(data);
+            if (!active.current) return;
             modal?.setDirty(false);
             onSuccess(result);
           } catch (error) {
+            if (!active.current) return;
             setMessage(
               error instanceof Error
                 ? error.message
@@ -264,15 +277,17 @@ export function AppForm<T>({
             if (error instanceof ApiError) focusError(error.fields);
           } finally {
             busyRef.current = false;
-            setBusy(false);
-            modal?.setBusy(false);
+            if (active.current) {
+              setBusy(false);
+              modal?.setBusy(false);
+            }
           }
         }}
       >
         <fieldset disabled={busy}>
           {children}
-          <div className="form-error" id={errorId} role="alert">
-            {message}
+          <div className="form-error" id={errorId} role={busy ? "status" : "alert"}>
+            {busy ? <span className="form-progress">Виконуємо запит…</span> : message}
           </div>
           <div className="form-actions">
             {!hideCancel && (

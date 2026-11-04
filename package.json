@@ -19,7 +19,7 @@
     "preview:pages": "npm run preview -w @food-delivery/web -- --mode pages --port 4173 --strictPort",
     "check": "npm run generate && node scripts/check.mjs && npm run check --workspaces",
     "test": "npm run generate && npm run build -w @food-delivery/backend && node scripts/prepare-pages.mjs && node --test --test-concurrency=1 tests/*.test.mjs",
-    "test:browser": "node scripts/prepare-pages.mjs && node --test tests/browser-runtime.test.mjs",
+    "test:browser": "node scripts/prepare-pages.mjs && node --test --test-concurrency=1 tests/browser-runtime.test.mjs tests/browser-auth.test.mjs",
     "db:deploy": "node scripts/deploy.mjs",
     "db:studio": "node scripts/prisma.mjs studio",
     "db:catalog": "node scripts/catalog.mjs",

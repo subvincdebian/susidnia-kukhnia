@@ -1,3 +1,4 @@
+import { loginDemo } from './auth-helpers.mjs';
 import { forDatabase } from "../scripts/runtime.mjs";
 import { test, before, after } from "node:test";
 import assert from "node:assert/strict";
@@ -128,8 +129,7 @@ before(async () => {
     restaurants: wrap(restaurants.list.bind(restaurants)),
     analytics: wrap(analytics.get.bind(analytics)),
   };
-  const response = await fetch(base + "/api/session");
-  cookie = response.headers.get("set-cookie").split(";")[0];
+  cookie = (await loginDemo(base,forDatabase(runtime.config,testDatabase))).cookie;
 });
 after(async () => {
   if (app) await app.close();
@@ -486,12 +486,12 @@ test("Перехід існуючої БД на Prisma зберігає дані
       "SELECT migration_name,finished_at FROM _prisma_migrations",
     )
   ).rows;
-  assert.equal(history.length, 10);
+  assert.equal(history.length, 11);
   assert(history.every((r) => r.finished_at));
   await migrate(forDatabase(runtime.config, testDatabase));
   assert.equal(
     (await pool.query("SELECT COUNT(*) FROM _prisma_migrations")).rows[0].count,
-    "10",
+    "11",
   );
 });
 test("JSON, гроші, пагінація та CRUD мають сумісний HTTP-контракт", async () => {
@@ -543,8 +543,7 @@ test("JSON, гроші, пагінація та CRUD мають сумісний
   try {
     await devApp.listen(0, "127.0.0.1");
     const url = await devApp.getUrl();
-    const session = await fetch(url + "/api/session");
-    const devCookie = session.headers.get("set-cookie").split(";")[0];
+    const devCookie = (await loginDemo(url,forDatabase(runtime.config,testDatabase),{origin:'http://127.0.0.1:5173'})).cookie;
     const devHeaders = {
       cookie: devCookie,
       Origin: "http://127.0.0.1:5173",
