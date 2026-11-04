@@ -2,7 +2,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import type { Dish, Restaurant } from "./model";
 import { assetHref, money } from "../../shared/lib";
-import { Empty, Field } from "../../shared/ui";
+import { Empty, Field, Skeleton } from "../../shared/ui";
 
 function officialUrl(value?: string | null) {
   if (!value) return null;
@@ -30,20 +30,38 @@ export function CatalogPhoto({
   const localSrc =
     src?.startsWith("/media/catalog/") && !src.includes("..") ? src : null;
   const [failedSource, setFailedSource] = useState<string | null>(null);
+  const [loadedSource, setLoadedSource] = useState<string | null>(null);
+  const imageRef = useRef<HTMLImageElement>(null);
   const available = localSrc && failedSource !== localSrc;
+  const loaded = Boolean(available && loadedSource === localSrc);
+  useEffect(() => {
+    const image = imageRef.current;
+    if (localSrc && image?.complete && image.naturalWidth > 0)
+      setLoadedSource(localSrc);
+  }, [localSrc]);
   return (
-    <div className={`catalog-photo catalog-photo-${variant}`}>
+    <div
+      className={`catalog-photo catalog-photo-${variant}`}
+      data-state={!available ? "unavailable" : loaded ? "ready" : "loading"}
+      aria-busy={Boolean(available && !loaded)}
+    >
       {available ? (
-        <img
-          src={assetHref(localSrc)}
-          alt={alt}
-          width={variant === "restaurant" ? 640 : 480}
-          height={variant === "restaurant" ? 360 : 320}
-          loading={priority ? "eager" : "lazy"}
-          fetchPriority={priority ? "high" : undefined}
-          decoding="async"
-          onError={() => setFailedSource(localSrc)}
-        />
+        <>
+          <Skeleton className="catalog-photo-skeleton" />
+          <img
+            key={localSrc}
+            ref={imageRef}
+            src={assetHref(localSrc)}
+            alt={alt}
+            width={variant === "restaurant" ? 640 : 480}
+            height={variant === "restaurant" ? 360 : 320}
+            loading={priority ? "eager" : "lazy"}
+            fetchPriority={priority ? "high" : undefined}
+            decoding="async"
+            onLoad={() => setLoadedSource(localSrc)}
+            onError={() => setFailedSource(localSrc)}
+          />
+        </>
       ) : (
         <div className="catalog-photo-fallback">
           <svg

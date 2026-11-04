@@ -10,6 +10,7 @@ import type { ReactNode } from "react";
 import type { Resource } from "../api";
 import { ApiError } from "../api";
 import { PageLink } from "./page-link";
+import { ContentSkeleton } from "./skeleton";
 
 export function Heading({
   title,
@@ -51,25 +52,51 @@ export function Async<T>({
   resource,
   children,
   quiet = false,
+  fallback,
 }: {
   resource: Resource<T>;
   children: (data: T) => ReactNode;
   quiet?: boolean;
+  fallback?: ReactNode;
 }) {
   if (!resource.data) {
     if (resource.error) {
-      const status = resource.error instanceof ApiError ? resource.error.status : 0;
+      const status =
+        resource.error instanceof ApiError ? resource.error.status : 0;
       return (
         <div className="state" role="alert">
-          <h2>{status === 401 ? "Потрібно ввійти до акаунта" : status === 403 ? "Доступ обмежено" : status === 404 ? "Запис недоступний" : "Не вдалося завантажити дані"}</h2>
+          <h2>
+            {status === 401
+              ? "Потрібно ввійти до акаунта"
+              : status === 403
+                ? "Доступ обмежено"
+                : status === 404
+                  ? "Запис недоступний"
+                  : "Не вдалося завантажити дані"}
+          </h2>
           <p>{resource.error.message}</p>
-          {[401, 403].includes(status) ? <div className="actions"><PageLink view="account" params={{ next: window.location.search.slice(1) }}>Переглянути акаунт</PageLink><PageLink view="restaurants">До закладів</PageLink></div> : status === 404 ? <PageLink view="history">До моїх замовлень</PageLink> : <button onClick={resource.retry}>Повторити</button>}
+          {[401, 403].includes(status) ? (
+            <div className="actions">
+              <PageLink
+                view="account"
+                params={{ next: window.location.search.slice(1) }}
+              >
+                Переглянути акаунт
+              </PageLink>
+              <PageLink view="restaurants">До закладів</PageLink>
+            </div>
+          ) : status === 404 ? (
+            <PageLink view="history">До моїх замовлень</PageLink>
+          ) : (
+            <button onClick={resource.retry}>Повторити</button>
+          )}
         </div>
       );
     }
     return (
-      <div className="state" role="status">
-        Завантаження даних...
+      <div className="async-loading" role="status" aria-busy="true">
+        <span className="sr-only">Завантаження даних...</span>
+        {fallback ?? <ContentSkeleton />}
       </div>
     );
   }

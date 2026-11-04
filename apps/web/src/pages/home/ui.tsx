@@ -1,12 +1,16 @@
 import { useRef, useState } from "react";
 import type { MouseEvent, ReactNode } from "react";
-import { CatalogPhoto, RestaurantPreview } from "../../entities/restaurant";
+import {
+  CatalogPhoto,
+  RestaurantPreview,
+  RestaurantGridSkeleton,
+} from "../../entities/restaurant";
 import type { Restaurant, RestaurantDetail } from "../../entities/restaurant";
 import { useResource } from "../../shared/api";
 import type { Resource } from "../../shared/api";
 import { money, navigate, pageHref } from "../../shared/lib";
 import type { Page } from "../../shared/lib";
-import { Async, Empty } from "../../shared/ui";
+import { Async, Empty, Skeleton } from "../../shared/ui";
 import { featuredDish, featuredRestaurants, heroRestaurants } from "./model";
 
 const cuisines = [
@@ -93,6 +97,12 @@ export function HomePage({ onMenu }: { onMenu: (id: number) => void }) {
   const thirdMenu = useResource<RestaurantDetail>(
     third ? `/restaurants/${third.id}` : null,
   );
+  const catalogLoading = !restaurants.data && restaurants.loading;
+  const heroLoading =
+    catalogLoading ||
+    Boolean(first && firstMenu.loading && !firstMenu.data) ||
+    Boolean(second && secondMenu.loading && !secondMenu.data) ||
+    Boolean(third && thirdMenu.loading && !thirdMenu.data);
   const [query, setQuery] = useState("");
   const searchRef = useRef<HTMLInputElement>(null);
   const composing = useRef(false);
@@ -105,13 +115,13 @@ export function HomePage({ onMenu }: { onMenu: (id: number) => void }) {
             Заклади твого міста
           </p>
           <h1 id="home-title">
-            Смачне поруч.
-            <br />
-            <span>Обирай своє.</span>
+            <span className="home-title-line">Смачне поруч.</span>
+            <span className="home-title-line home-title-accent">
+              Обирай своє.
+            </span>
           </h1>
           <p className="home-intro">
-            Обирай страви із закладів Києва.
-            Меню, ціни та фото в одному місці.
+            Обирай страви із закладів Києва. Меню, ціни та фото в одному місці.
           </p>
           <form
             className="home-search"
@@ -177,6 +187,11 @@ export function HomePage({ onMenu }: { onMenu: (id: number) => void }) {
           </CatalogLink>
         </div>
         <div className="home-hero-media" aria-label="Страви з меню закладів">
+          {heroLoading && (
+            <span className="sr-only" role="status">
+              Завантаження страв із меню...
+            </span>
+          )}
           {(restaurants.error && !restaurants.data) ||
           (restaurants.data && !first) ? (
             <div className="home-hero-status" role="status">
@@ -210,6 +225,7 @@ export function HomePage({ onMenu }: { onMenu: (id: number) => void }) {
                 resource={firstMenu}
                 preferredName="пепероні"
                 variant="main"
+                catalogLoading={catalogLoading}
                 onMenu={onMenu}
               />
               <HeroFood
@@ -217,6 +233,7 @@ export function HomePage({ onMenu }: { onMenu: (id: number) => void }) {
                 resource={secondMenu}
                 preferredName="гірос класичний"
                 variant="second"
+                catalogLoading={catalogLoading}
                 onMenu={onMenu}
               />
               <HeroFood
@@ -224,11 +241,10 @@ export function HomePage({ onMenu }: { onMenu: (id: number) => void }) {
                 resource={thirdMenu}
                 preferredName="тірамісу"
                 variant="third"
+                catalogLoading={catalogLoading}
                 onMenu={onMenu}
               />
-              <span className="home-photo-note">
-                З меню київських закладів
-              </span>
+              <span className="home-photo-note">З меню київських закладів</span>
             </>
           )}
         </div>
@@ -262,7 +278,7 @@ export function HomePage({ onMenu }: { onMenu: (id: number) => void }) {
             Усі заклади <Arrow diagonal />
           </CatalogLink>
         </div>
-        <Async resource={restaurants}>
+        <Async resource={restaurants} fallback={<RestaurantGridSkeleton />}>
           {(data) => {
             const featured = featuredRestaurants(data.items);
             return featured.length ? (
@@ -283,34 +299,37 @@ export function HomePage({ onMenu }: { onMenu: (id: number) => void }) {
           }}
         </Async>
       </section>
-
     </div>
   );
 }
 
-function HeroFood({
+export function HeroFood({
   restaurant,
   resource,
   preferredName,
   variant,
   onMenu,
+  catalogLoading = false,
 }: {
   restaurant: Restaurant | undefined;
   resource: Resource<RestaurantDetail>;
   preferredName: string;
   variant: "main" | "second" | "third";
   onMenu: (id: number) => void;
+  catalogLoading?: boolean;
 }) {
   const dish = featuredDish(resource.data, preferredName);
   const className = `home-food home-food-${variant}`;
+  if (!restaurant && !catalogLoading) return null;
   if (!restaurant || (!resource.data && !resource.error))
     return (
-      <div
-        className={`${className} home-food-placeholder`}
-        aria-busy={Boolean(restaurant)}
-      >
-        <div className="home-food-placeholder-image" aria-hidden="true" />
-        <span>{restaurant ? "Завантаження меню..." : "Меню твого міста"}</span>
+      <div className={`${className} home-food-placeholder`} aria-hidden="true">
+        <Skeleton className="home-food-skeleton-media" />
+        <div className="home-food-caption skeleton-stack">
+          <Skeleton className="skeleton-eyebrow" />
+          <Skeleton className="skeleton-heading" />
+          <Skeleton className="skeleton-price" />
+        </div>
       </div>
     );
   if (resource.error && !resource.data)

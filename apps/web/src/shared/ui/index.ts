@@ -1,5 +1,6 @@
 export { Modal, useModal } from "./modal";
 export { PageLink } from "./page-link";
+export { Skeleton, ContentSkeleton } from "./skeleton";
 export { MapCanvas } from "./map";
 export type { MapPin } from "./map";
 export { AddressField, LocationPicker } from "./address";

@@ -3,6 +3,7 @@ import {
   CatalogPhoto,
   DishCatalog,
   RestaurantSources,
+  MenuSkeleton,
 } from "../../entities/restaurant";
 import type { RestaurantDetail } from "../../entities/restaurant";
 import { AddToCart } from "../../features/add-to-cart";
@@ -29,7 +30,7 @@ export function MenuPage({ id }: { id: number | null }) {
       <PageLink view="restaurants" className="shop-back-link">
         ← Усі заклади
       </PageLink>
-      <Async resource={resource}>
+      <Async resource={resource} fallback={<MenuSkeleton />}>
         {(restaurant) => (
           <>
             <div className="menu-masthead">

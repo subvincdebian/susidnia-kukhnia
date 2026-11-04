@@ -1596,15 +1596,16 @@
   .shop-shell .page-content {
     animation: shop-page-in var(--motion-enter) var(--motion-ease);
   }
-  .home-hero h1,
   .shop-page-heading h1,
   .menu-heading h1 {
     animation: shop-text-in var(--motion-enter) var(--motion-ease);
   }
   .home-intro {
-    animation: shop-text-in calc(var(--motion-enter) + var(--motion-fast)) var(--motion-ease);
+    animation: shop-text-in calc(var(--motion-enter) + var(--motion-fast))
+      var(--motion-ease);
   }
-  .shop-shell :is(.shop-primary-link, .add-to-cart, .cart-proceed, .shop-cart-button),
+  .shop-shell
+    :is(.shop-primary-link, .add-to-cart, .cart-proceed, .shop-cart-button),
   .shop-overlays .cart-proceed,
   .mobile-cart-bar > button {
     transition:
@@ -1612,7 +1613,13 @@
       border-color var(--motion-fast),
       transform var(--motion-fast) var(--motion-ease);
   }
-  .shop-shell :is(.shop-primary-link, .add-to-cart, .cart-proceed, .shop-cart-button):active:not(:disabled),
+  .shop-shell
+    :is(
+      .shop-primary-link,
+      .add-to-cart,
+      .cart-proceed,
+      .shop-cart-button
+    ):active:not(:disabled),
   .shop-overlays .cart-proceed:active:not(:disabled),
   .mobile-cart-bar > button:active:not(:disabled) {
     transform: translateY(1px);
@@ -1641,7 +1648,42 @@
     transition: transform var(--motion-base) var(--motion-ease);
   }
   .home-food {
-    animation: shop-food-in 440ms var(--motion-ease);
+    animation: shop-food-in var(--motion-hero) var(--motion-ease) backwards;
+  }
+  .home-food-second {
+    animation-delay: 65ms;
+  }
+  .home-food-third {
+    animation-delay: 130ms;
+  }
+  .home-title-line {
+    animation: shop-text-in var(--motion-hero) var(--motion-ease) backwards;
+  }
+  .home-title-accent {
+    animation-delay: 85ms;
+  }
+  .home-restaurant-card:not(.restaurant-skeleton) {
+    animation: shop-card-in var(--motion-hero) var(--motion-ease) backwards;
+  }
+  .home-restaurant-card:nth-child(2) {
+    animation-delay: 45ms;
+  }
+  .home-restaurant-card:nth-child(3) {
+    animation-delay: 90ms;
+  }
+  .home-restaurant-card:nth-child(4) {
+    animation-delay: 135ms;
+  }
+  .home-restaurant-card:nth-child(n + 5) {
+    animation-delay: 180ms;
+  }
+  .home-quiet-link svg,
+  .home-all-link svg {
+    transition: transform var(--motion-base) var(--motion-ease);
+  }
+  .home-quiet-link:hover svg,
+  .home-all-link:hover svg {
+    transform: translateX(3px);
   }
   .home-manage[open] nav {
     animation: shop-dialog-in var(--motion-base) var(--motion-ease);
@@ -1679,8 +1721,12 @@
   }
 }
 @keyframes shop-page-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 @keyframes shop-text-in {
   from {
@@ -1693,21 +1739,57 @@
   }
 }
 @keyframes shop-count-in {
-  from { opacity: 0.65; transform: scale(0.85); }
-  60% { transform: scale(1.08); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0.65;
+    transform: scale(0.85);
+  }
+  60% {
+    transform: scale(1.08);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 @keyframes shop-dialog-in {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 @keyframes shop-toast-in {
-  from { opacity: 0; transform: translate(-50%, 8px); }
-  to { opacity: 1; transform: translate(-50%, 0); }
+  from {
+    opacity: 0;
+    transform: translate(-50%, 8px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
 }
 @keyframes shop-food-in {
-  from { opacity: 0; transform: translateY(12px) rotate(var(--food-tilt)); }
-  to { opacity: 1; transform: translateY(0) rotate(var(--food-tilt)); }
+  from {
+    opacity: 0;
+    transform: translateY(20px) rotate(calc(var(--food-tilt) - 2deg));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) rotate(var(--food-tilt));
+  }
+}
+@keyframes shop-card-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 @media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
   .shop-shell .shop-dish-card {
@@ -1717,7 +1799,9 @@
     border-color: var(--primary);
   }
   .shop-shell .shop-dish-card img {
-    transition: transform var(--motion-enter) var(--motion-ease);
+    transition:
+      transform var(--motion-enter) var(--motion-ease),
+      opacity var(--motion-enter) ease-out;
   }
   .shop-shell .shop-dish-card:hover img {
     transform: scale(1.025);
@@ -1730,4 +1814,39 @@
   .home-restaurant-card > :is(button, a):hover img {
     transform: none;
   }
+}
+
+.menu-skeleton .menu-heading {
+  display: flex;
+  gap: 0.9rem;
+}
+.skeleton-menu-title {
+  width: 70%;
+  height: 3rem;
+}
+.menu-skeleton .menu-meta > .skeleton-description {
+  width: 9rem;
+}
+.menu-search-skeleton {
+  margin-block: 1.5rem;
+  gap: 0.9rem;
+}
+.skeleton-category {
+  width: 9rem;
+  margin-block: 1.5rem 1.2rem;
+}
+.menu-cart-skeleton {
+  min-height: 250px;
+  padding: 1.5rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+.menu-cart-skeleton .skeleton-control {
+  margin-top: auto;
+}
+.skeleton-add {
+  width: 112px;
+  height: 44px;
+  border-radius: var(--control-radius);
 }

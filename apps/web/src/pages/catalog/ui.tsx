@@ -1,5 +1,9 @@
 import { useEffect } from "react";
-import { RestaurantPreview, RestaurantMap } from "../../entities/restaurant";
+import {
+  RestaurantPreview,
+  RestaurantMap,
+  RestaurantGridSkeleton,
+} from "../../entities/restaurant";
 import type { Restaurant } from "../../entities/restaurant";
 import { useResource } from "../../shared/api";
 import { navigate, useLocationParams } from "../../shared/lib";
@@ -87,7 +91,15 @@ export function CatalogPage() {
       {map ? (
         <RestaurantMap query={q} />
       ) : (
-        <Async resource={resource}>
+        <Async
+          resource={resource}
+          fallback={
+            <>
+              <div className="shop-results" aria-hidden="true" />
+              <RestaurantGridSkeleton />
+            </>
+          }
+        >
           {(data) => (
             <>
               <p className="shop-results" role="status">

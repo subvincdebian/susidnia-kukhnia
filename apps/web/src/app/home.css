@@ -141,7 +141,10 @@
   line-height: 1.07;
   letter-spacing: -0.065em;
 }
-.home-hero h1 > span {
+.home-title-line {
+  display: block;
+}
+.home-hero h1 > .home-title-accent {
   color: var(--primary);
 }
 .home-intro {
@@ -388,21 +391,24 @@ button.home-food:hover {
   display: none;
 }
 .home-food-placeholder {
-  justify-content: flex-end;
+  pointer-events: none;
 }
-.home-food-placeholder > span {
-  min-height: var(--food-caption);
-  display: flex;
-  align-items: center;
-  padding: 1rem;
-  color: var(--home-muted);
-  font-size: 0.75rem;
+.home-food-placeholder .home-food-caption {
+  gap: 0.55rem;
 }
-.home-food-placeholder-image {
-  flex: 1;
-  background: var(--home-soft);
-  margin: 1.5rem;
-  border-radius: 50%;
+.home-food-skeleton-media {
+  flex: 1 1 0;
+  width: 100%;
+  min-height: 0;
+  border-radius: 0;
+}
+.home-food-placeholder .skeleton-heading {
+  height: 0.8rem;
+  width: 86%;
+}
+.home-food-placeholder .skeleton-price {
+  height: 0.7rem;
+  width: 38%;
 }
 .home-food-error {
   justify-content: center;
@@ -532,7 +538,9 @@ button.home-food:hover {
   background: var(--home-soft);
 }
 .home-restaurant-card .catalog-photo img {
-  transition: transform 250ms ease;
+  transition:
+    transform 250ms ease,
+    opacity var(--motion-enter) ease-out;
 }
 .home-restaurant-card > :is(button, a):hover img {
   transform: scale(1.035);
@@ -1021,10 +1029,6 @@ button.home-food:hover {
   }
   .home-food-arrow {
     display: none;
-  }
-  .home-food-placeholder > span {
-    padding: 0.6rem;
-    font-size: 0.6875rem;
   }
   .home-section-heading h2 {
     font-size: 1.8rem;
