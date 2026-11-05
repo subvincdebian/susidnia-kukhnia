@@ -34,6 +34,17 @@ export function filters(input: unknown) {
   const q=object(input);
   return {q:q.q ? text(q.q,'q',100,0) : '',page:q.page ? integer(Number(q.page),'page',1,100000) : 1,status:q.status ? text(q.status,'status',30) : ''};
 }
+export function dishFilters(input: unknown) {
+  const b=object(input),base=filters(input);
+  const sort=b.sort===undefined||b.sort===''?'price_asc':text(b.sort,'sort',20);
+  if(!['price_asc','price_desc','name'].includes(sort))throw new HttpError(400,'Оберіть сортування',{sort:'Невідомий спосіб сортування'});
+  const max_price=b.max_price===undefined||b.max_price===''?null:text(b.max_price,'max_price',11);
+  if(max_price!==null&&!/^\d{1,8}(\.\d{1,2})?$/.test(max_price))throw new HttpError(400,'Перевірте бюджет',{max_price:'Невід’ємна сума, максимум два знаки після крапки'});
+  const restaurant_id=b.restaurant_id===undefined||b.restaurant_id===''?null:integer(Number(b.restaurant_id),'restaurant_id');
+  const ids=b.ids===undefined||b.ids===''?[]:text(b.ids,'ids',32).split(',').map(id=>integer(Number(id),'ids'));
+  if(ids.length>3||new Set(ids).size!==ids.length)throw new HttpError(400,'Оберіть до трьох різних страв',{ids:'Максимум три різні позиції'});
+  return {...base,sort,max_price,restaurant_id,ids};
+}
 export function phone(value: unknown): string {
   const p=text(value,'phone',20);
   if(!/^\+?[\d ()-]{7,20}$/.test(p))throw new HttpError(400,'Перевірте телефон',{phone:'Вкажіть номер телефону'});

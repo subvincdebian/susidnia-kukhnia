@@ -37,3 +37,11 @@ export interface Dish {
 export interface RestaurantDetail extends Restaurant {
   menu: Dish[];
 }
+export interface MenuOffer extends Dish {
+  restaurant_name: string;
+  restaurant_address: string;
+  restaurant_cuisine: string;
+  source_checked_at: string | null;
+  source_note: string | null;
+  restaurant_menu_url: string | null;
+}

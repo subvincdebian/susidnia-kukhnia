@@ -1,0 +1,1 @@
+export { CompareDishes } from "./ui";

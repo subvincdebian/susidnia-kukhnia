@@ -8,7 +8,9 @@ test("search navigation: menu context survives explicit return and is cleared fo
     keys.map((key) => [key, Object.getOwnPropertyDescriptor(globalThis, key)]),
   );
   const browser = {
-    location: { href: "https://example.test/?view=restaurants&q=піца" },
+    location: {
+      href: "https://example.test/?view=restaurants&q=піца&sort=price_desc&max_price=300&restaurant_id=2&compare=1,2&catalog_state=old",
+    },
     dispatchEvent() {},
     scrollTo() {},
   };
@@ -49,6 +51,14 @@ test("search navigation: menu context survives explicit return and is cleared fo
     assert.equal(next.searchParams.get("id"), "9");
     assert.equal(next.searchParams.has("q"), false);
     assert.equal(next.searchParams.has("catalog_q"), false);
+    for (const key of [
+      "catalog_state",
+      "sort",
+      "max_price",
+      "restaurant_id",
+      "compare",
+    ])
+      assert.equal(next.searchParams.has(key), false);
   } finally {
     for (const key of keys) {
       const descriptor = originals.get(key);

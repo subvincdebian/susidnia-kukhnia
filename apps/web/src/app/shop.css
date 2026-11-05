@@ -168,6 +168,303 @@
   color: var(--danger);
   font-size: 0.75rem;
 }
+.offer-filters {
+  display: grid;
+  grid-template-columns:
+    minmax(130px, 1fr) minmax(160px, 1.3fr) minmax(180px, 1.3fr)
+    auto;
+  align-items: start;
+  gap: 1rem;
+  margin: 1.5rem 0 0.75rem;
+}
+.offer-filters .field {
+  margin-bottom: 0;
+}
+.offer-filters > button {
+  margin-top: 1.65rem;
+  min-height: var(--control-height);
+}
+.offer-search-help {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  margin-bottom: 1.5rem;
+}
+.offer-search-help p {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--home-muted);
+}
+.shop-shell .dish-grid.offer-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.offer-card .dish-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  flex: 1;
+}
+.offer-card h2 {
+  font-size: 1.1rem;
+  line-height: 1.4;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.offer-card h2 a {
+  color: var(--home-ink);
+}
+.offer-photo-link {
+  display: block;
+}
+.offer-restaurant {
+  color: var(--primary);
+  font-weight: 600;
+  font-size: 0.8125rem;
+  margin: 0;
+}
+.offer-category {
+  font-size: 0.75rem;
+  color: var(--home-muted);
+  margin: 0;
+}
+.offer-price {
+  display: grid;
+  gap: 0.25rem;
+  margin: 0.25rem 0 0.75rem;
+}
+.offer-price strong {
+  font-size: 1.25rem;
+  color: var(--home-ink);
+}
+.offer-price > span {
+  color: var(--home-muted);
+  font-size: 0.8125rem;
+  overflow-wrap: anywhere;
+}
+.offer-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: auto;
+}
+.offer-actions > a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  min-height: 44px;
+  font-size: 0.8125rem;
+}
+.offer-compare-choice[aria-pressed="true"] {
+  background: var(--home-soft);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+.offer-results.has-comparison {
+  padding-bottom: 12rem;
+}
+html:has(.offer-compare-tray) {
+  scroll-padding-block-end: 12rem;
+}
+.offer-compare-tray {
+  position: fixed;
+  z-index: 30;
+  bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(var(--page-max), calc(100% - 2rem));
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--surface);
+  border: 1px solid var(--home-line);
+  border-radius: var(--home-radius);
+}
+.offer-compare-summary {
+  display: grid;
+  gap: 0.2rem;
+}
+.offer-compare-summary strong {
+  font-size: 0.9375rem;
+}
+.offer-compare-summary > span {
+  color: var(--home-muted);
+  font-size: 0.75rem;
+}
+.offer-compare-tray ul {
+  display: flex;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-x: auto;
+}
+.offer-compare-tray li {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  max-width: 13rem;
+  flex-shrink: 0;
+  padding-left: 0.75rem;
+  background: var(--home-soft);
+  border-radius: var(--control-radius);
+}
+.offer-compare-tray li > span {
+  display: grid;
+  gap: 0.1rem;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.8125rem;
+}
+.offer-compare-tray li > span > * {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.offer-compare-tray li > span > strong {
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.offer-compare-tray li > span > span {
+  color: var(--home-muted);
+  font-size: 0.75rem;
+}
+.offer-compare-tray li > button {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0.25rem;
+  border: 0;
+  background: transparent;
+  flex-shrink: 0;
+}
+.offer-compare-tray-actions {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+}
+dialog:has(.dish-comparison) {
+  width: min(94vw, 68rem);
+}
+.comparison-note,
+.comparison-footnote,
+.comparison-scroll-hint {
+  font-size: 0.8125rem;
+  color: var(--home-muted);
+}
+.comparison-note {
+  margin: 0 0 1.25rem;
+}
+.comparison-scroll-hint {
+  display: none;
+}
+.comparison-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--home-line);
+  border-radius: var(--radius);
+}
+.comparison-scroll table {
+  width: 100%;
+  min-width: 42rem;
+  table-layout: fixed;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.8125rem;
+}
+.comparison-scroll th,
+.comparison-scroll td {
+  padding: 1rem;
+  vertical-align: top;
+  text-align: left;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  border-bottom: 1px solid var(--home-line);
+}
+.comparison-scroll th:first-child {
+  width: 8rem;
+}
+.comparison-scroll th[scope="row"] {
+  position: sticky;
+  left: 0;
+  background: var(--surface);
+  z-index: 1;
+}
+.comparison-scroll th[scope="col"] {
+  background: var(--surface);
+  color: var(--home-ink);
+}
+.comparison-scroll h3 {
+  font-size: 1rem;
+  margin: 0.75rem 0 0;
+}
+.comparison-scroll .catalog-photo {
+  height: 8rem;
+  border-radius: var(--radius);
+}
+.comparison-scroll p {
+  margin: 0.4rem 0 0;
+  color: var(--home-muted);
+}
+.comparison-scroll details {
+  margin-top: 0.5rem;
+}
+.comparison-price-row td {
+  color: var(--primary);
+  font-size: 1.2rem;
+  font-weight: 650;
+}
+.comparison-scroll tr:last-child > * {
+  border-bottom: 0;
+}
+@media (max-width: 980px) {
+  .shop-shell .dish-grid.offer-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .offer-compare-tray {
+    grid-template-columns: 1fr auto;
+  }
+  .offer-compare-tray ul {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+}
+@media (max-width: 640px) {
+  .offer-filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+  .shop-shell .dish-grid.offer-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .offer-compare-tray {
+    bottom: calc(0.5rem + env(safe-area-inset-bottom, 0px));
+    width: calc(100% - 1rem);
+    gap: 0.75rem;
+    padding: 0.75rem;
+  }
+  .offer-compare-tray-actions {
+    gap: 0.5rem;
+  }
+  .offer-compare-tray-actions .text-button {
+    font-size: 0.75rem;
+  }
+  .offer-results.has-comparison {
+    padding-bottom: 14rem;
+  }
+  html:has(.offer-compare-tray) {
+    scroll-padding-block-end: 14rem;
+  }
+  .comparison-scroll-hint {
+    display: block;
+  }
+}
 .restaurant-search-matches {
   margin-top: 1rem;
   padding-top: 1rem;

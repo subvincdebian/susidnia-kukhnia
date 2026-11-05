@@ -2,7 +2,7 @@ import type { PGliteInterface } from "@electric-sql/pglite";
 import { createOrders } from "./orders.ts";
 import { createBrowserAuth, memoryTokenStore, type BrowserTokenStore, type BrowserUser } from "./auth.ts";
 import { jsonValue, one, page, rows, type Row } from "./sql.ts";
-import { date, fail, filters, flag, integer, minorUnits, money, object, phone, publicError, statuses, text } from "./validation.ts";
+import { date, dishFilters, fail, filters, flag, integer, minorUnits, money, object, phone, publicError, statuses, text } from "./validation.ts";
 export { BrowserApiError } from "./validation.ts";
 
 interface RestaurantRow extends Row { id: number; name: string; address: string; phone: string; cuisine_type: string }
@@ -13,7 +13,8 @@ function catalogSearch(q: string) {
   const dish=`m.is_available AND (${match("m.name")} OR ${match("m.category")})`;
   const where=`(${match("r.name")} OR ${match("r.cuisine_type")} OR EXISTS(SELECT 1 FROM menu_items m WHERE m.restaurant_id=r.id AND ${dish}))`;
   const count=`(SELECT COUNT(*) FROM menu_items m WHERE length($1)>0 AND m.restaurant_id=r.id AND ${dish})`;
-  return {needle,dish,where,count};
+  const offer=`(${match("m.name")} OR ${match("m.category")} OR ${match("r.name")} OR ${match("r.cuisine_type")})`;
+  return {needle,dish,where,count,offer};
 }
 function courierFields(input: unknown) {
   const body = object(input), vehicle = text(body.vehicle_type, "vehicle_type", 30);
@@ -47,6 +48,15 @@ export function createBrowserApi(db: PGliteInterface, tokenStore: BrowserTokenSt
       COALESCE((SELECT jsonb_agg(to_jsonb(matched)||jsonb_build_object('price',matched.price::text)) FROM
         (SELECT m.* FROM menu_items m WHERE length($1)>0 AND m.restaurant_id=r.id AND ${search.dish} ORDER BY m.price,m.name,m.id LIMIT 3) matched),'[]'::jsonb) AS matched_dishes
       FROM restaurants r WHERE ${search.where} ORDER BY r.is_active DESC,r.name,r.id`, [search.needle], requestedPage);
+  }
+  function menuList(query: Record<string,unknown>) {
+    const input=dishFilters(query),search=catalogSearch(input.q);
+    const order=input.sort==='price_desc'?'m.price DESC,m.name,m.id':input.sort==='name'?'m.name,m.price,m.id':'m.price,m.name,m.id';
+    return page(db,`SELECT m.*,r.name AS restaurant_name,r.address AS restaurant_address,r.cuisine_type AS restaurant_cuisine,
+      r.source_checked_at,r.source_note,r.menu_url AS restaurant_menu_url FROM menu_items m JOIN restaurants r ON r.id=m.restaurant_id
+      WHERE r.is_active AND m.is_available AND ${search.offer} AND ($2::numeric IS NULL OR m.price<=$2::numeric)
+      AND ($3::integer IS NULL OR r.id=$3::integer) AND (cardinality($4::integer[])=0 OR m.id=ANY($4::integer[])) ORDER BY ${order}`,
+      [search.needle,input.max_price,input.restaurant_id,input.ids],input.page);
   }
   async function restaurantMap(query: Record<string, unknown>) {
     const search=catalogSearch(filters(query).q);
@@ -195,7 +205,8 @@ export function createBrowserApi(db: PGliteInterface, tokenStore: BrowserTokenSt
     const user = await auth.current();
     const publicRead = method === "GET" && (resource === "session" && segments.length === 1
       || resource === "bootstrap" && segments.length === 1
-      || resource === "restaurants" && segments.length <= 2);
+      || resource === "restaurants" && segments.length <= 2
+      || resource === "menu" && segments.length === 1);
     if (!publicRead) {
       if (!user) fail(401, "Увійдіть до облікового запису");
       if (user.role !== "admin") {
@@ -227,6 +238,7 @@ export function createBrowserApi(db: PGliteInterface, tokenStore: BrowserTokenSt
         if (resource === "session") return { ready: true };
         if (resource === "bootstrap") return bootstrap(user);
         if (resource === "restaurants") return restaurantList(query);
+        if (resource === "menu") return menuList(query);
         if (resource === "customers") return customerList(query);
         if (resource === "couriers") return courierList(query);
         if (resource === "orders") return orders.list(query);

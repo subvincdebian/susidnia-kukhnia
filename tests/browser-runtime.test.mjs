@@ -1,6 +1,6 @@
 import { before, after, test } from "node:test";
 import assert from "node:assert/strict";
-import { verifyCatalogSearch } from "./catalog-search-contract.mjs";
+import { invalidMenuSearches, verifyCatalogSearch } from "./catalog-search-contract.mjs";
 import { createRequire } from "node:module";
 import { readFile } from "node:fs/promises";
 import { createHash } from "node:crypto";
@@ -98,6 +98,8 @@ async function status(id, expected_status, nextStatus, extra = {}) {
 test("search: Pages matches dish names and categories with PostgreSQL-compatible results", async () => {
   const guest=createBrowserApi(db);
   await verifyCatalogSearch((sql,params)=>db.query(sql,params),route=>guest.request(route));
+  for(const route of invalidMenuSearches)await assert.rejects(guest.request(route),errorStatus(400));
+  await assert.rejects(guest.request('/menu','POST',{restaurant_id:1,name:'Denied guest dish',category:'Основне',price:'9.99',description:'',is_available:true}),errorStatus(401));
 });
 
 test("browser initialization commits seed once and retains edits", async () => {

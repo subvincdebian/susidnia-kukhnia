@@ -4,6 +4,7 @@ import {
   DishCatalog,
   RestaurantSources,
   MenuSkeleton,
+  catalogReturnParams,
 } from "../../entities/restaurant";
 import type { RestaurantDetail } from "../../entities/restaurant";
 import { AddToCart } from "../../features/add-to-cart";
@@ -16,6 +17,8 @@ export function MenuPage({ id }: { id: number | null }) {
   const params = useLocationParams();
   const initialQuery = (params.get("q") ?? "").trim().slice(0, 100);
   const catalogQuery = (params.get("catalog_q") ?? "").trim().slice(0, 100);
+  const catalogState = params.get("catalog_state");
+  const returnParams = catalogReturnParams(catalogState, catalogQuery);
   const resource = useResource<RestaurantDetail>(
     id ? `/restaurants/${id}` : null,
   );
@@ -33,10 +36,12 @@ export function MenuPage({ id }: { id: number | null }) {
     <div className="shop-page menu-page">
       <PageLink
         view="restaurants"
-        params={catalogQuery ? { q: catalogQuery } : undefined}
+        params={returnParams}
         className="shop-back-link"
       >
-        {catalogQuery ? "← Назад до результатів" : "← Усі заклади"}
+        {catalogQuery || catalogState
+          ? "← Назад до результатів"
+          : "← Усі заклади"}
       </PageLink>
       <Async resource={resource} fallback={<MenuSkeleton />}>
         {(restaurant) => (

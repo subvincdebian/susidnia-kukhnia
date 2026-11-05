@@ -51,6 +51,17 @@ export function filters(input: Record<string, unknown>) {
     status: input.status ? text(input.status, "status", 30) : "",
   };
 }
+export function dishFilters(input: Record<string, unknown>) {
+  const base=filters(input);
+  const sort=input.sort===undefined||input.sort===''?'price_asc':text(input.sort,'sort',20);
+  if(!['price_asc','price_desc','name'].includes(sort))fail(400,'Оберіть сортування',{sort:'Невідомий спосіб сортування'});
+  const max_price=input.max_price===undefined||input.max_price===''?null:text(input.max_price,'max_price',11);
+  if(max_price!==null&&!/^\d{1,8}(\.\d{1,2})?$/.test(max_price))fail(400,'Перевірте бюджет',{max_price:'Невід’ємна сума, максимум два знаки після крапки'});
+  const restaurant_id=input.restaurant_id===undefined||input.restaurant_id===''?null:integer(Number(input.restaurant_id),'restaurant_id');
+  const ids=input.ids===undefined||input.ids===''?[]:text(input.ids,'ids',32).split(',').map(id=>integer(Number(id),'ids'));
+  if(ids.length>3||new Set(ids).size!==ids.length)fail(400,'Оберіть до трьох різних страв',{ids:'Максимум три різні позиції'});
+  return {...base,sort,max_price,restaurant_id,ids};
+}
 export function phone(value: unknown): string {
   const valueText = text(value, "phone", 20);
   if (!/^\+?[\d ()-]{7,20}$/.test(valueText))

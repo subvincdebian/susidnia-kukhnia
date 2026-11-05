@@ -12,7 +12,9 @@ let Async,
   RestaurantGridSkeleton,
   MenuSkeleton,
   RestaurantPreview,
-  DishCatalog;
+  DishCatalog,
+  MenuOfferCard,
+  DishComparison;
 before(async () => {
   server = await createServer({
     root: fileURLToPath(new URL("../apps/web/", import.meta.url)),
@@ -22,6 +24,12 @@ before(async () => {
   });
   ({ Async } = await server.ssrLoadModule("/src/shared/ui/primitives.tsx"));
   ({ HeroFood } = await server.ssrLoadModule("/src/pages/home/ui.tsx"));
+  ({ DishComparison } = await server.ssrLoadModule(
+    "/src/features/compare-dishes/ui.tsx",
+  ));
+  ({ MenuOfferCard } = await server.ssrLoadModule(
+    "/src/entities/restaurant/index.ts",
+  ));
   ({
     CatalogPhoto,
     RestaurantGridSkeleton,
@@ -230,4 +238,71 @@ test("menu loading: placeholders cannot receive focus or pretend to be available
   assert.match(html, /menu-masthead/);
   assert.match(html, /menu-cart-sidebar/);
   assert.doesNotMatch(html, /<(?:button|a|input|select)\b|tabindex=/i);
+});
+
+const comparisonOffer = {
+  id: 4,
+  restaurant_id: 7,
+  name: "Сирники",
+  restaurant_name: "Заклад А",
+  restaurant_address: "Київ",
+  category: "Сніданки",
+  price: "219.00",
+  is_available: true,
+  portion: "120/30/30 г",
+  description: null,
+  source_url: "https://example.test/menu",
+  source_checked_at: "2026-10-24",
+  source_note: null,
+};
+test("comparison: table preserves ambiguous portions and shows unit prices only where known", () => {
+  const html = renderToStaticMarkup(
+    h(DishComparison, {
+      offers: [
+        comparisonOffer,
+        {
+          ...comparisonOffer,
+          id: 5,
+          restaurant_id: 8,
+          restaurant_name: "Заклад Б",
+          name: "Інші сирники",
+          price: "165.00",
+          portion: "150 г",
+        },
+      ],
+      catalogState: "q=сирники",
+    }),
+  );
+  assert.match(html, /120\/30\/30 г/);
+  assert.match(html, /Не розраховано/);
+  assert.equal([...html.matchAll(/\/ 100 г/g)].length, 1);
+  assert.match(html, /scope="row"/);
+  assert.match(html, /scope="col"/);
+  assert.match(html, /24\.10\.26/);
+  assert.match(html, /href="https:\/\/example.test\/menu"/);
+});
+test("comparison: dish cards expose restaurant, portion and a return link with all filters", () => {
+  const state = "q=сирники&sort=price_desc&max_price=300&compare=4,5";
+  const html = renderToStaticMarkup(
+    h(
+      MenuOfferCard,
+      { offer: comparisonOffer, catalogState: state },
+      h("button", null, "Порівняти"),
+    ),
+  );
+  const links = [...html.matchAll(/href="([^"]+)"/g)].map(
+    (match) =>
+      new URL(match[1].replaceAll("&amp;", "&"), "https://example.test"),
+  );
+  assert(links.length >= 2);
+  assert(
+    links.every(
+      (link) =>
+        link.searchParams.get("catalog_state") === state &&
+        link.searchParams.get("q") === "Сирники",
+    ),
+  );
+  assert.match(html, /Заклад А/);
+  assert.match(html, /120\/30\/30 г/);
+  assert.match(html, /<button>Порівняти<\/button>/);
 });

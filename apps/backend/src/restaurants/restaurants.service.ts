@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { flag, HttpError, integer, money, object, phone, text } from '../common/validation.js';
+import { dishFilters, flag, HttpError, integer, money, object, phone, text } from '../common/validation.js';
 
 @Injectable()
 export class RestaurantsService {
@@ -12,7 +12,18 @@ export class RestaurantsService {
     const dish=Prisma.sql`m.is_available AND (${match(Prisma.sql`m.name`)} OR ${match(Prisma.sql`m.category`)})`;
     const where=Prisma.sql`(${match(Prisma.sql`r.name`)} OR ${match(Prisma.sql`r.cuisine_type`)} OR EXISTS(SELECT 1 FROM menu_items m WHERE m.restaurant_id=r.id AND ${dish}))`;
     const count=Prisma.sql`(SELECT COUNT(*) FROM menu_items m WHERE ${Boolean(needle)} AND m.restaurant_id=r.id AND ${dish})`;
-    return {needle,dish,where,count};
+    const offer=Prisma.sql`(${match(Prisma.sql`m.name`)} OR ${match(Prisma.sql`m.category`)} OR ${match(Prisma.sql`r.name`)} OR ${match(Prisma.sql`r.cuisine_type`)})`;
+    return {needle,dish,where,count,offer};
+  }
+  menu(input: ReturnType<typeof dishFilters>) {
+    const search=this.search(input.q);
+    const budget=input.max_price===null?Prisma.empty:Prisma.sql`AND m.price<=${input.max_price}::numeric`;
+    const restaurant=input.restaurant_id===null?Prisma.empty:Prisma.sql`AND r.id=${input.restaurant_id}`;
+    const ids=input.ids.length?Prisma.sql`AND m.id IN (${Prisma.join(input.ids)})`:Prisma.empty;
+    const order=input.sort==='price_desc'?Prisma.sql`m.price DESC,m.name,m.id`:input.sort==='name'?Prisma.sql`m.name,m.price,m.id`:Prisma.sql`m.price,m.name,m.id`;
+    return this.db.page(Prisma.sql`SELECT m.*,r.name AS restaurant_name,r.address AS restaurant_address,r.cuisine_type AS restaurant_cuisine,
+      r.source_checked_at,r.source_note,r.menu_url AS restaurant_menu_url FROM menu_items m JOIN restaurants r ON r.id=m.restaurant_id
+      WHERE r.is_active AND m.is_available AND ${search.offer} ${budget} ${restaurant} ${ids} ORDER BY ${order}`,input.page);
   }
   list({q='',page=1}: {q?:string;page?:number}) {
     const search=this.search(q);

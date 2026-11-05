@@ -4,7 +4,7 @@ import type { Dish, Restaurant } from "./model";
 import { assetHref, money } from "../../shared/lib";
 import { Empty, Field, Skeleton } from "../../shared/ui";
 
-function officialUrl(value?: string | null) {
+export function officialUrl(value?: string | null) {
   if (!value) return null;
   try {
     const url = new URL(value);

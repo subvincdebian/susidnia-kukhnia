@@ -5,14 +5,17 @@ import { money } from "../../shared/lib";
 export function RestaurantPreview({
   restaurant,
   searchQuery = "",
+  catalogState = "",
 }: {
   restaurant: Restaurant;
   searchQuery?: string;
+  catalogState?: string;
 }) {
   const matches = searchQuery ? (restaurant.matched_dishes ?? []) : [];
   const context: Record<string, string | number> = searchQuery
     ? { catalog_q: searchQuery }
     : {};
+  if (catalogState) context.catalog_state = catalogState;
   return (
     <article
       className={`home-restaurant-card${matches.length ? " has-dish-matches" : ""}`}

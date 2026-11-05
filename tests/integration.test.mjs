@@ -1,5 +1,5 @@
 import { loginDemo } from './auth-helpers.mjs';
-import { verifyCatalogSearch } from './catalog-search-contract.mjs';
+import { invalidMenuSearches, verifyCatalogSearch } from './catalog-search-contract.mjs';
 import { forDatabase } from "../scripts/runtime.mjs";
 import { test, before, after } from "node:test";
 import assert from "node:assert/strict";
@@ -503,6 +503,9 @@ test("search: назви страв, категорії, регістр і ка�
     assert.equal(response.status,200);
     return response.json();
   });
+  for(const route of invalidMenuSearches)assert.equal((await fetch(base+'/api'+route,{headers:{cookie:guestCookie}})).status,400);
+  const mutation=await fetch(base+'/api/menu',{method:'POST',headers:{cookie:guestCookie,origin:base,'content-type':'application/json'},body:JSON.stringify({restaurant_id:1,name:'Denied guest dish',category:'Основне',price:'9.99',description:'',is_available:true})});
+  assert.equal(mutation.status,401);
 });
 
 test("JSON, гроші, пагінація та CRUD мають сумісний HTTP-контракт", async () => {

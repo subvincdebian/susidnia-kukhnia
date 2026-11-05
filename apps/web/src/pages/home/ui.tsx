@@ -183,7 +183,7 @@ export function HomePage({ onMenu }: { onMenu: (id: number) => void }) {
             </button>
           </form>
           <div className="home-search-examples" aria-label="Популярні запити">
-            {["Піца", "Бургер", "Салат"].map((term) => (
+            {["Піца", "Бургер", "Салат", "Сирники"].map((term) => (
               <CatalogLink key={term} query={term}>
                 {term}
               </CatalogLink>

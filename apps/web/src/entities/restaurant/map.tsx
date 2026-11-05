@@ -12,22 +12,36 @@ interface MapCatalog {
   missing_coordinates: number;
   truncated: boolean;
 }
-export function RestaurantMap({ query }: { query: string }) {
+export function RestaurantMap({
+  query,
+  catalogState = "",
+}: {
+  query: string;
+  catalogState?: string;
+}) {
   const resource = useResource<MapCatalog>(
     `/restaurants/map?${new URLSearchParams({ q: query })}`,
   );
   return (
     <Async resource={resource}>
-      {(data) => <MapCatalogContent data={data} query={query} />}
+      {(data) => (
+        <MapCatalogContent
+          data={data}
+          query={query}
+          catalogState={catalogState}
+        />
+      )}
     </Async>
   );
 }
 function MapCatalogContent({
   data,
   query,
+  catalogState,
 }: {
   data: MapCatalog;
   query: string;
+  catalogState: string;
 }) {
   const [selectedId, select] = useState<number | null>(null);
   const [fit, setFit] = useState(0);
@@ -98,6 +112,7 @@ function MapCatalogContent({
                 view="menu"
                 params={{
                   id: selected.id,
+                  ...(catalogState ? { catalog_state: catalogState } : {}),
                   ...(query ? { catalog_q: query } : {}),
                   ...(Number(selected.matched_dishes_count) > 0
                     ? { q: query }

@@ -113,6 +113,7 @@ export async function verifyCatalogSearch(query, request) {
     const venue = await search("Search contract 0");
     assert.equal(venue.total, 1);
     assert.equal(venue.items[0].id, ids[0]);
+    await verifyMenuSearch(query, request, ids);
   } finally {
     if (ids.length) {
       await query(
@@ -123,3 +124,75 @@ export async function verifyCatalogSearch(query, request) {
     }
   }
 }
+
+async function verifyMenuSearch(query, request, ids) {
+  const offers = (extras = {}) =>
+    request("/menu?" + new URLSearchParams({ q: "піцамаяк", ...extras }));
+  const first = await offers();
+  assert.equal(first.total, 48);
+  assert.equal(first.size, 10);
+  assert.equal(first.pages, 5);
+  const all = [];
+  for (let page = 1; page <= first.pages; page++)
+    all.push(
+      ...(page === 1 ? first : await offers({ page: String(page) })).items,
+    );
+  assert.equal(new Set(all.map((row) => row.id)).size, 48);
+  assert.deepEqual(
+    all.map((row) => Number(row.price)),
+    all.map((row) => Number(row.price)).toSorted((a, b) => a - b),
+  );
+  assert(
+    all.every(
+      (row) =>
+        row.restaurant_id !== ids.at(-1) &&
+        row.is_available &&
+        typeof row.price === "string" &&
+        typeof row.restaurant_name === "string",
+    ),
+  );
+  const last = await offers({ page: "999" });
+  assert.equal(last.page, 5);
+  assert.equal(last.items.length, 8);
+  const descending = await offers({ sort: "price_desc" });
+  assert(descending.items.every((row) => row.price === "40.25"));
+  const budget = await offers({ max_price: "20.25" });
+  assert.equal(budget.total, 24);
+  assert(budget.items.every((row) => Number(row.price) <= 20.25));
+  assert.equal((await offers({ max_price: "0" })).total, 0);
+  assert.equal((await offers({ restaurant_id: String(ids[0]) })).total, 4);
+  assert.equal((await offers({ restaurant_id: String(ids.at(-1)) })).total, 0);
+  assert.equal((await offers({ q: "прихованамаякстрава" })).total, 0);
+  assert.equal((await offers({ q: "ПІЦАМАЯК" })).total, 48);
+  assert.equal((await offers({ q: "%_Маяк\\" })).total, 1);
+  const chosen = all.slice(0, 2);
+  await query("UPDATE menu_items SET portion=$1 WHERE id=$2", [
+    "120/30/30 г",
+    chosen[0].id,
+  ]);
+  const selected = await request(
+    "/menu?" +
+      new URLSearchParams({ ids: chosen.map((row) => row.id).join(",") }),
+  );
+  assert.equal(selected.total, 2);
+  assert.deepEqual(
+    selected.items.map((row) => row.id).sort((a, b) => a - b),
+    chosen.map((row) => row.id).sort((a, b) => a - b),
+  );
+  assert.equal(
+    selected.items.find((row) => row.id === chosen[0].id).portion,
+    "120/30/30 г",
+  );
+}
+
+export const invalidMenuSearches = [
+  "/menu?max_price=-1",
+  "/menu?max_price=1.001",
+  "/menu?max_price=100000000",
+  "/menu?max_price=NaN",
+  "/menu?sort=unknown",
+  "/menu?restaurant_id=0",
+  "/menu?ids=1,2,3,4",
+  "/menu?ids=1,1",
+  "/menu?ids=-1",
+];
