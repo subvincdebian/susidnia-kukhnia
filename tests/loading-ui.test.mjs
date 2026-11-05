@@ -6,7 +6,13 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { createServer } from "vite";
 
 let server;
-let Async, HeroFood, CatalogPhoto, RestaurantGridSkeleton, MenuSkeleton;
+let Async,
+  HeroFood,
+  CatalogPhoto,
+  RestaurantGridSkeleton,
+  MenuSkeleton,
+  RestaurantPreview,
+  DishCatalog;
 before(async () => {
   server = await createServer({
     root: fileURLToPath(new URL("../apps/web/", import.meta.url)),
@@ -16,8 +22,13 @@ before(async () => {
   });
   ({ Async } = await server.ssrLoadModule("/src/shared/ui/primitives.tsx"));
   ({ HeroFood } = await server.ssrLoadModule("/src/pages/home/ui.tsx"));
-  ({ CatalogPhoto, RestaurantGridSkeleton, MenuSkeleton } =
-    await server.ssrLoadModule("/src/entities/restaurant/index.ts"));
+  ({
+    CatalogPhoto,
+    RestaurantGridSkeleton,
+    MenuSkeleton,
+    RestaurantPreview,
+    DishCatalog,
+  } = await server.ssrLoadModule("/src/entities/restaurant/index.ts"));
 });
 after(async () => {
   await server?.close();
@@ -36,6 +47,78 @@ const venue = {
   is_active: true,
   image_url: "/media/catalog/venue.webp",
 };
+test("search UI: matching dishes have separate menu links and preserve the catalog query", () => {
+  const dishes = Array.from({ length: 3 }, (_, index) => ({
+    id: index + 1,
+    restaurant_id: 7,
+    name: `Піца ${index}`,
+    category: "Піца",
+    price: "123.45",
+    is_available: true,
+  }));
+  const html = renderToStaticMarkup(
+    h(RestaurantPreview, {
+      restaurant: {
+        ...venue,
+        matched_dishes: dishes,
+        matched_dishes_count: 12,
+      },
+      searchQuery: "піца",
+    }),
+  );
+  const links = [...html.matchAll(/href="([^"]+)"/g)].map(
+    (match) =>
+      new URL(match[1].replaceAll("&amp;", "&"), "https://example.test"),
+  );
+  assert.equal(links.length, 5);
+  assert(
+    links.every(
+      (url) =>
+        url.searchParams.get("catalog_q") === "піца" &&
+        url.searchParams.get("id") === "7",
+    ),
+  );
+  assert.equal(links[1].searchParams.get("q"), "Піца 0");
+  assert.equal(links.at(-1).searchParams.get("q"), "піца");
+  assert.match(html, /Страв за запитом: 12/);
+  const ordinary = renderToStaticMarkup(
+    h(RestaurantPreview, { restaurant: { ...venue, matched_dishes: dishes } }),
+  );
+  assert.doesNotMatch(ordinary, /restaurant-search-matches/);
+});
+test("search UI: a linked menu opens with the requested dish already filtered", () => {
+  const dishes = [
+    {
+      id: 1,
+      restaurant_id: 7,
+      name: "Піца Маргарита",
+      description: null,
+      category: "Піца",
+      price: "123.45",
+      is_available: true,
+    },
+    {
+      id: 2,
+      restaurant_id: 7,
+      name: "Борщ",
+      description: null,
+      category: "Супи",
+      price: "89.00",
+      is_available: true,
+    },
+  ];
+  const html = renderToStaticMarkup(
+    h(DishCatalog, {
+      dishes,
+      initialQuery: "ПІЦА",
+      renderActions: () => null,
+      shop: true,
+    }),
+  );
+  assert.match(html, /value="ПІЦА"/);
+  assert.match(html, /Піца Маргарита/);
+  assert.doesNotMatch(html, />Борщ</);
+});
 const renderHero = (options = {}) =>
   renderToStaticMarkup(
     h(HeroFood, {

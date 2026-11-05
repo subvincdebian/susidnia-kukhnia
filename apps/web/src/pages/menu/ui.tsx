@@ -10,8 +10,12 @@ import { AddToCart } from "../../features/add-to-cart";
 import { CartPanel } from "../../widgets/cart";
 import { useResource } from "../../shared/api";
 import { Async, Empty, PageLink } from "../../shared/ui";
+import { useLocationParams } from "../../shared/lib";
 
 export function MenuPage({ id }: { id: number | null }) {
+  const params = useLocationParams();
+  const initialQuery = (params.get("q") ?? "").trim().slice(0, 100);
+  const catalogQuery = (params.get("catalog_q") ?? "").trim().slice(0, 100);
   const resource = useResource<RestaurantDetail>(
     id ? `/restaurants/${id}` : null,
   );
@@ -27,8 +31,12 @@ export function MenuPage({ id }: { id: number | null }) {
     );
   return (
     <div className="shop-page menu-page">
-      <PageLink view="restaurants" className="shop-back-link">
-        ← Усі заклади
+      <PageLink
+        view="restaurants"
+        params={catalogQuery ? { q: catalogQuery } : undefined}
+        className="shop-back-link"
+      >
+        {catalogQuery ? "← Назад до результатів" : "← Усі заклади"}
       </PageLink>
       <Async resource={resource} fallback={<MenuSkeleton />}>
         {(restaurant) => (
@@ -77,6 +85,7 @@ export function MenuPage({ id }: { id: number | null }) {
                 <DishCatalog
                   shop
                   dishes={restaurant.menu}
+                  initialQuery={initialQuery}
                   emptyHint="Спробуй обрати інший заклад"
                   renderActions={(dish) => (
                     <AddToCart restaurant={restaurant} dish={dish} />

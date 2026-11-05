@@ -1,4 +1,5 @@
 import { loginDemo } from './auth-helpers.mjs';
+import { verifyCatalogSearch } from './catalog-search-contract.mjs';
 import { forDatabase } from "../scripts/runtime.mjs";
 import { test, before, after } from "node:test";
 import assert from "node:assert/strict";
@@ -494,6 +495,16 @@ test("Перехід існуючої БД на Prisma зберігає дані
     "11",
   );
 });
+test("search: назви страв, категорії, регістр і карта мають сумісний публічний HTTP-контракт", async () => {
+  const session=await fetch(base+'/api/session');
+  const guestCookie=session.headers.get('set-cookie').split(';')[0];
+  await verifyCatalogSearch((sql,params)=>pool.query(sql,params),async route=>{
+    const response=await fetch(base+'/api'+route,{headers:{cookie:guestCookie}});
+    assert.equal(response.status,200);
+    return response.json();
+  });
+});
+
 test("JSON, гроші, пагінація та CRUD мають сумісний HTTP-контракт", async () => {
   const headers = { cookie, Origin: base, "Content-Type": "application/json" };
   const response = await fetch(base + "/api/orders/1", { headers: { cookie } }),

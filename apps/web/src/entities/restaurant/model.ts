@@ -18,6 +18,8 @@ export interface Restaurant {
   latitude?: number | null;
   longitude?: number | null;
   coordinate_source?: string | null;
+  matched_dishes?: Dish[];
+  matched_dishes_count?: Numeric;
 }
 export interface Dish {
   id: number;

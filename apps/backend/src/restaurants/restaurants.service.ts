@@ -6,22 +6,33 @@ import { flag, HttpError, integer, money, object, phone, text } from '../common/
 @Injectable()
 export class RestaurantsService {
   constructor(@Inject(PrismaService) private readonly db: PrismaService) {}
-  list({q='',page=1}: {q?:string;page?:number}) {
-    return this.db.page(Prisma.sql`SELECT r.*,(SELECT COUNT(*) FROM menu_items WHERE restaurant_id=r.id) AS dishes_count,
-      (SELECT ROUND(AVG(v.rating),2) FROM reviews v JOIN orders o ON o.id=v.order_id WHERE o.restaurant_id=r.id) AS review_rating
-      FROM restaurants r WHERE r.name ILIKE ${'%'+q+'%'} OR r.cuisine_type ILIKE ${'%'+q+'%'} ORDER BY r.is_active DESC,r.name,r.id`,page);
+  private search(q: string) {
+    const needle=q.trim().toLocaleLowerCase('uk-UA');
+    const match=(column: Prisma.Sql)=>Prisma.sql`strpos(translate(lower(${column}), 'АБВГҐДЕЄЖЗИІЇЙКЛМНОПРСТУФХЦЧШЩЬЮЯЁЪЫЭ', 'абвгґдеєжзиіїйклмнопрстуфхцчшщьюяёъыэ'), ${needle})>0`;
+    const dish=Prisma.sql`m.is_available AND (${match(Prisma.sql`m.name`)} OR ${match(Prisma.sql`m.category`)})`;
+    const where=Prisma.sql`(${match(Prisma.sql`r.name`)} OR ${match(Prisma.sql`r.cuisine_type`)} OR EXISTS(SELECT 1 FROM menu_items m WHERE m.restaurant_id=r.id AND ${dish}))`;
+    const count=Prisma.sql`(SELECT COUNT(*) FROM menu_items m WHERE ${Boolean(needle)} AND m.restaurant_id=r.id AND ${dish})`;
+    return {needle,dish,where,count};
   }
-  async map() {
-    const [items, total, missing] = await this.db.$transaction([
-      this.db.restaurant.findMany({
-        select: {id:true,name:true,address:true,phone:true,cuisine_type:true,is_active:true,latitude:true,longitude:true,coordinate_source:true,image_url:true,image_alt:true,website_url:true,menu_url:true},
-        orderBy: [{is_active:'desc'},{name:'asc'},{id:'asc'}],
-        take: 500,
-      }),
-      this.db.restaurant.count(),
-      this.db.restaurant.count({where:{OR:[{latitude:null},{longitude:null}]}}),
+  list({q='',page=1}: {q?:string;page?:number}) {
+    const search=this.search(q);
+    return this.db.page(Prisma.sql`SELECT r.*,(SELECT COUNT(*) FROM menu_items WHERE restaurant_id=r.id) AS dishes_count,
+      (SELECT ROUND(AVG(v.rating),2) FROM reviews v JOIN orders o ON o.id=v.order_id WHERE o.restaurant_id=r.id) AS review_rating,
+      ${search.count} AS matched_dishes_count,
+      COALESCE((SELECT jsonb_agg(to_jsonb(matched)||jsonb_build_object('price',matched.price::text)) FROM
+        (SELECT m.* FROM menu_items m WHERE ${Boolean(search.needle)} AND m.restaurant_id=r.id AND ${search.dish} ORDER BY m.price,m.name,m.id LIMIT 3) matched),'[]'::jsonb) AS matched_dishes
+      FROM restaurants r WHERE ${search.where} ORDER BY r.is_active DESC,r.name,r.id`,page);
+  }
+  async map(q='') {
+    const search=this.search(q);
+    const [items, counts] = await this.db.$transaction([
+      this.db.$queryRaw<Record<string,unknown>[]>(Prisma.sql`SELECT r.id,r.name,r.address,r.phone,r.cuisine_type,r.is_active,r.latitude,r.longitude,r.coordinate_source,r.image_url,r.image_alt,r.website_url,r.menu_url,
+        ${search.count} AS matched_dishes_count FROM restaurants r WHERE ${search.where} ORDER BY r.is_active DESC,r.name,r.id LIMIT 500`),
+      this.db.$queryRaw<{total:number;missing:number}[]>(Prisma.sql`SELECT COUNT(*)::integer AS total,COUNT(*) FILTER(WHERE r.latitude IS NULL OR r.longitude IS NULL)::integer AS missing FROM restaurants r WHERE ${search.where}`),
     ]);
-    return {items,total,missing_coordinates:missing,truncated:total>items.length};
+    const count=counts[0];
+    if(!count)throw new Error('Не отримано кількість закладів');
+    return {items,total:count.total,missing_coordinates:count.missing,truncated:count.total>items.length};
   }
   async get(id: number) {
     const row=await this.db.restaurant.findUnique({where:{id},include:{menu:{orderBy:[{is_available:'desc'},{category:'asc'},{name:'asc'},{id:'asc'}]}}});

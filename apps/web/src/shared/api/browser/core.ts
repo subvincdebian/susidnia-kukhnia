@@ -7,6 +7,14 @@ export { BrowserApiError } from "./validation.ts";
 
 interface RestaurantRow extends Row { id: number; name: string; address: string; phone: string; cuisine_type: string }
 interface MenuRow extends Row { id: number; restaurant_id: number; name: string; price: string; description: string | null; category: string }
+function catalogSearch(q: string) {
+  const needle=q.trim().toLocaleLowerCase("uk-UA");
+  const match=(column: string)=>`strpos(translate(lower(${column}), 'АБВГҐДЕЄЖЗИІЇЙКЛМНОПРСТУФХЦЧШЩЬЮЯЁЪЫЭ', 'абвгґдеєжзиіїйклмнопрстуфхцчшщьюяёъыэ'), $1)>0`;
+  const dish=`m.is_available AND (${match("m.name")} OR ${match("m.category")})`;
+  const where=`(${match("r.name")} OR ${match("r.cuisine_type")} OR EXISTS(SELECT 1 FROM menu_items m WHERE m.restaurant_id=r.id AND ${dish}))`;
+  const count=`(SELECT COUNT(*) FROM menu_items m WHERE length($1)>0 AND m.restaurant_id=r.id AND ${dish})`;
+  return {needle,dish,where,count};
+}
 function courierFields(input: unknown) {
   const body = object(input), vehicle = text(body.vehicle_type, "vehicle_type", 30);
   if (!["пішки", "велосипед", "скутер", "автомобіль"].includes(vehicle))
@@ -32,15 +40,20 @@ export function createBrowserApi(db: PGliteInterface, tokenStore: BrowserTokenSt
   }
   function restaurantList(query: Record<string, unknown>) {
     const { q, page: requestedPage } = filters(query);
+    const search=catalogSearch(q);
     return page(db, `SELECT r.*,(SELECT COUNT(*) FROM menu_items WHERE restaurant_id=r.id) AS dishes_count,
-      (SELECT ROUND(AVG(v.rating),2) FROM reviews v JOIN orders o ON o.id=v.order_id WHERE o.restaurant_id=r.id) AS review_rating
-      FROM restaurants r WHERE r.name ILIKE $1 OR r.cuisine_type ILIKE $1 ORDER BY r.is_active DESC,r.name,r.id`, ["%" + q + "%"], requestedPage);
+      (SELECT ROUND(AVG(v.rating),2) FROM reviews v JOIN orders o ON o.id=v.order_id WHERE o.restaurant_id=r.id) AS review_rating,
+      ${search.count} AS matched_dishes_count,
+      COALESCE((SELECT jsonb_agg(to_jsonb(matched)||jsonb_build_object('price',matched.price::text)) FROM
+        (SELECT m.* FROM menu_items m WHERE length($1)>0 AND m.restaurant_id=r.id AND ${search.dish} ORDER BY m.price,m.name,m.id LIMIT 3) matched),'[]'::jsonb) AS matched_dishes
+      FROM restaurants r WHERE ${search.where} ORDER BY r.is_active DESC,r.name,r.id`, [search.needle], requestedPage);
   }
-  async function restaurantMap() {
+  async function restaurantMap(query: Record<string, unknown>) {
+    const search=catalogSearch(filters(query).q);
     return db.transaction(async (tx) => {
-      const items = await rows(tx, `SELECT id,name,address,phone,cuisine_type,is_active,latitude,longitude,coordinate_source,image_url,image_alt,website_url,menu_url
-        FROM restaurants ORDER BY is_active DESC,name,id LIMIT 500`);
-      const counts = await one<{ total: number; missing: number }>(tx, "SELECT COUNT(*)::integer AS total,COUNT(*) FILTER(WHERE latitude IS NULL OR longitude IS NULL)::integer AS missing FROM restaurants");
+      const items = await rows(tx, `SELECT r.id,r.name,r.address,r.phone,r.cuisine_type,r.is_active,r.latitude,r.longitude,r.coordinate_source,r.image_url,r.image_alt,r.website_url,r.menu_url,
+        ${search.count} AS matched_dishes_count FROM restaurants r WHERE ${search.where} ORDER BY r.is_active DESC,r.name,r.id LIMIT 500`,[search.needle]);
+      const counts = await one<{ total: number; missing: number }>(tx, `SELECT COUNT(*)::integer AS total,COUNT(*) FILTER(WHERE r.latitude IS NULL OR r.longitude IS NULL)::integer AS missing FROM restaurants r WHERE ${search.where}`,[search.needle]);
       return { items, total: counts.total, missing_coordinates: counts.missing, truncated: counts.total > items.length };
     });
   }
@@ -225,7 +238,7 @@ export function createBrowserApi(db: PGliteInterface, tokenStore: BrowserTokenSt
         if (resource === "analytics") return analytics(query);
       }
       if (segments.length === 2) {
-        if (resource === "restaurants" && rawId === "map") return restaurantMap();
+        if (resource === "restaurants" && rawId === "map") return restaurantMap(query);
         if (resource === "restaurants") return restaurantGet(id());
         if (resource === "orders" && rawId === "recent" && user) return orders.recent(query, user.customer_id);
         if (resource === "orders") return orders.get(id());

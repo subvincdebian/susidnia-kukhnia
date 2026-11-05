@@ -132,7 +132,7 @@ export function HomePage({ onMenu }: { onMenu: (id: number) => void }) {
             }}
           >
             <label htmlFor="home-search" className="sr-only">
-              Назва закладу або кухня
+              Страва, заклад або кухня
             </label>
             <div className="home-search-input">
               <svg
@@ -149,7 +149,7 @@ export function HomePage({ onMenu }: { onMenu: (id: number) => void }) {
                 id="home-search"
                 ref={searchRef}
                 type="search"
-                placeholder="Заклад чи кухня"
+                placeholder="Піца, борщ або назва закладу"
                 maxLength={100}
                 value={query}
                 onChange={(event) => setQuery(event.currentTarget.value)}
@@ -182,6 +182,13 @@ export function HomePage({ onMenu }: { onMenu: (id: number) => void }) {
               Знайти <Arrow />
             </button>
           </form>
+          <div className="home-search-examples" aria-label="Популярні запити">
+            {["Піца", "Бургер", "Салат"].map((term) => (
+              <CatalogLink key={term} query={term}>
+                {term}
+              </CatalogLink>
+            ))}
+          </div>
           <CatalogLink className="home-quiet-link">
             Або переглянути всі заклади <Arrow />
           </CatalogLink>

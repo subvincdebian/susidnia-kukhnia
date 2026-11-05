@@ -13,7 +13,9 @@ interface MapCatalog {
   truncated: boolean;
 }
 export function RestaurantMap({ query }: { query: string }) {
-  const resource = useResource<MapCatalog>("/restaurants/map");
+  const resource = useResource<MapCatalog>(
+    `/restaurants/map?${new URLSearchParams({ q: query })}`,
+  );
   return (
     <Async resource={resource}>
       {(data) => <MapCatalogContent data={data} query={query} />}
@@ -29,14 +31,7 @@ function MapCatalogContent({
 }) {
   const [selectedId, select] = useState<number | null>(null);
   const [fit, setFit] = useState(0);
-  const items = useMemo(() => {
-    const needle = query.trim().toLocaleLowerCase("uk-UA");
-    return data.items.filter((item) =>
-      `${item.name} ${item.cuisine_type}`
-        .toLocaleLowerCase("uk-UA")
-        .includes(needle),
-    );
-  }, [data.items, query]);
+  const items = data.items;
   const selected = items.find((item) => item.id === selectedId) ?? null;
   const selectedPoint = selected
     ? geoPoint(selected.latitude, selected.longitude)
@@ -64,7 +59,7 @@ function MapCatalogContent({
     return (
       <Empty
         title="Закладів не знайдено"
-        hint="Зміни назву або кухню в пошуку"
+        hint="Зміни страву, назву закладу або кухню в пошуку"
       />
     );
   return (
@@ -101,7 +96,13 @@ function MapCatalogContent({
             <div className="actions">
               <PageLink
                 view="menu"
-                params={{ id: selected.id }}
+                params={{
+                  id: selected.id,
+                  ...(query ? { catalog_q: query } : {}),
+                  ...(Number(selected.matched_dishes_count) > 0
+                    ? { q: query }
+                    : {}),
+                }}
                 className="map-menu-link"
               >
                 Відкрити меню

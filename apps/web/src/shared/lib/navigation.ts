@@ -43,6 +43,7 @@ export function openPage(
     view: view === "home" ? null : view,
     id: null,
     q: null,
+    catalog_q: null,
     status: null,
     page: null,
     stage: null,

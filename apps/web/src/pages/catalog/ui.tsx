@@ -37,11 +37,13 @@ export function CatalogPage() {
       <header className="shop-page-heading">
         <div>
           {!map && <p className="home-eyebrow">Знайди свій смак</p>}
-          <h1 tabIndex={-1}>Заклади Києва</h1>
+          <h1 tabIndex={-1}>{q ? "Результати пошуку" : "Заклади Києва"}</h1>
           <p>
             {map
               ? "Обери заклад на карті або у списку поруч."
-              : "Обери заклад, відкрий меню та додай улюблені страви до кошика."}
+              : q
+                ? `Заклади та доступні страви за запитом: ${q}`
+                : "Обери заклад, відкрий меню та додай улюблені страви до кошика."}
           </p>
         </div>
         <div
@@ -68,7 +70,7 @@ export function CatalogPage() {
       <div className="shop-catalog-search">
         <Search
           value={q}
-          placeholder="Назва закладу або кухня"
+          placeholder="Страва, заклад або кухня"
           onSearch={search}
           onClear={() => search("")}
         />
@@ -120,13 +122,14 @@ export function CatalogPage() {
                     <RestaurantPreview
                       key={restaurant.id}
                       restaurant={restaurant}
+                      searchQuery={q}
                     />
                   ))}
                 </div>
               ) : (
                 <Empty
                   title="Закладів не знайдено"
-                  hint="Спробуй іншу назву або кухню"
+                  hint="Спробуй іншу страву, назву закладу або кухню"
                   onReset={() => search("")}
                 />
               )}

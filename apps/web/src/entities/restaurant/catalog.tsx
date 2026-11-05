@@ -139,21 +139,23 @@ export function DishCatalog({
   resetFiltersKey = 0,
   emptyHint = "Додайте першу страву",
   shop = false,
+  initialQuery = "",
 }: {
   dishes: Dish[];
   renderActions: (dish: Dish) => ReactNode;
   resetFiltersKey?: number;
   emptyHint?: string;
   shop?: boolean;
+  initialQuery?: string;
 }) {
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(initialQuery);
   const [category, setCategory] = useState("");
   const id = useId();
   const searchRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
-    setQuery("");
+    setQuery(initialQuery);
     setCategory("");
-  }, [resetFiltersKey]);
+  }, [resetFiltersKey, initialQuery]);
   const categories = [
     ...new Set(dishes.map((dish) => dish.category || "Інше")),
   ];

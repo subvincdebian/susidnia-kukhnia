@@ -1,5 +1,6 @@
 import { before, after, test } from "node:test";
 import assert from "node:assert/strict";
+import { verifyCatalogSearch } from "./catalog-search-contract.mjs";
 import { createRequire } from "node:module";
 import { readFile } from "node:fs/promises";
 import { createHash } from "node:crypto";
@@ -93,6 +94,11 @@ async function newCourier() {
 async function status(id, expected_status, nextStatus, extra = {}) {
   return request(`/orders/${id}/status`, "PATCH", { expected_status, status: nextStatus, ...extra });
 }
+
+test("search: Pages matches dish names and categories with PostgreSQL-compatible results", async () => {
+  const guest=createBrowserApi(db);
+  await verifyCatalogSearch((sql,params)=>db.query(sql,params),route=>guest.request(route));
+});
 
 test("browser initialization commits seed once and retains edits", async () => {
   assert.equal(await isInitialized(db), true);

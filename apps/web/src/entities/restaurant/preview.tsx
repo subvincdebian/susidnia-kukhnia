@@ -1,12 +1,29 @@
 import { PageLink } from "../../shared/ui";
 import { CatalogPhoto } from "./catalog";
 import type { Restaurant } from "./model";
-export function RestaurantPreview({ restaurant }: { restaurant: Restaurant }) {
+import { money } from "../../shared/lib";
+export function RestaurantPreview({
+  restaurant,
+  searchQuery = "",
+}: {
+  restaurant: Restaurant;
+  searchQuery?: string;
+}) {
+  const matches = searchQuery ? (restaurant.matched_dishes ?? []) : [];
+  const context: Record<string, string | number> = searchQuery
+    ? { catalog_q: searchQuery }
+    : {};
   return (
-    <article className="home-restaurant-card">
+    <article
+      className={`home-restaurant-card${matches.length ? " has-dish-matches" : ""}`}
+    >
       <PageLink
         view="menu"
-        params={{ id: restaurant.id }}
+        params={{
+          id: restaurant.id,
+          ...context,
+          ...(matches.length ? { q: searchQuery } : {}),
+        }}
         label={`Переглянути меню ${restaurant.name}`}
         className="restaurant-preview-link"
       >
@@ -40,6 +57,42 @@ export function RestaurantPreview({ restaurant }: { restaurant: Restaurant }) {
           </span>
         </span>
       </PageLink>
+      {matches.length > 0 && (
+        <div className="restaurant-search-matches">
+          <p className="restaurant-match-count">
+            Страв за запитом:{" "}
+            {restaurant.matched_dishes_count ?? matches.length}
+          </p>
+          <ul>
+            {matches.map((dish) => (
+              <li key={dish.id}>
+                <PageLink
+                  view="menu"
+                  params={{ id: restaurant.id, q: dish.name, ...context }}
+                  label={`Переглянути ${dish.name} у ${restaurant.name}`}
+                  className="restaurant-dish-match"
+                >
+                  <CatalogPhoto src={dish.image_url} alt="" />
+                  <span>
+                    <strong>{dish.name}</strong>
+                    <span>{money(dish.price)}</span>
+                  </span>
+                  <span className="restaurant-match-arrow" aria-hidden="true">
+                    ↗
+                  </span>
+                </PageLink>
+              </li>
+            ))}
+          </ul>
+          <PageLink
+            view="menu"
+            params={{ id: restaurant.id, q: searchQuery, ...context }}
+            className="restaurant-all-matches"
+          >
+            Переглянути всі збіги <span aria-hidden="true">→</span>
+          </PageLink>
+        </div>
+      )}
     </article>
   );
 }
