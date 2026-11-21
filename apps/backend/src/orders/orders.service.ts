@@ -12,6 +12,7 @@ import {
   integer,
   object,
   statuses,
+  tableOrder,
   text,
 } from "../common/validation.js";
 import {
@@ -28,19 +29,28 @@ export class OrdersService {
     q = "",
     status = "",
     page = 1,
+    sort,
+    customerId = null,
+    restaurantId = null,
   }: {
     q?: string;
     status?: string;
     page?: number;
+    sort?: unknown;
+    customerId?: number | null;
+    restaurantId?: number | null;
   }) {
     if (status && !statuses.includes(status))
       throw new HttpError(400, "Невідомий статус");
+    const order = tableOrder(sort, { id: "o.id", date: "o.order_date", customer: "c.full_name", restaurant: "r.name", status: "o.delivery_status", total: "o.total_amount", courier: "co.full_name" }, "o.order_date DESC");
     return this.db.page(
       Prisma.sql`SELECT o.*,c.full_name AS customer,r.name AS restaurant,co.full_name AS courier,p.method AS payment_method,p.refunded_at AS payment_refunded_at
       FROM orders o JOIN customers c ON c.id=o.customer_id JOIN restaurants r ON r.id=o.restaurant_id
       LEFT JOIN couriers co ON co.id=o.courier_id LEFT JOIN payments p ON p.order_id=o.id
-      WHERE (${status}='' OR o.delivery_status=${status}) AND (c.full_name ILIKE ${"%" + q + "%"} OR r.name ILIKE ${"%" + q + "%"} OR o.id::text ILIKE ${"%" + q + "%"})
-      ORDER BY o.order_date DESC,o.id DESC`,
+      WHERE (${status}='' OR o.delivery_status=${status})
+      AND (${customerId}::integer IS NULL OR o.customer_id=${customerId}::integer)
+      AND (${restaurantId}::integer IS NULL OR o.restaurant_id=${restaurantId}::integer) AND (c.full_name ILIKE ${"%" + q + "%"} OR r.name ILIKE ${"%" + q + "%"} OR o.id::text ILIKE ${"%" + q + "%"})
+      ORDER BY ${Prisma.raw(order)},o.id DESC`,
       page,
     );
   }
@@ -57,11 +67,15 @@ export class OrdersService {
         },
         payment: true,
         review: true,
+        checkout_request: { select: { order_id: true } },
+        _count: { select: { delivery_messages: true } },
       },
     });
     if (!row) throw new HttpError(404, "Замовлення не знайдено");
+    const { checkout_request, _count, ...details } = row;
     return {
-      ...row,
+      ...details,
+      can_delete: this.canDelete(row) && !checkout_request && !_count.delivery_messages && !row.payment && !row.review,
       customer: row.customer.full_name,
       customer_phone: row.customer.phone,
       restaurant: row.restaurant.name,
@@ -128,6 +142,12 @@ export class OrdersService {
       },
       { maxWait: 10000, timeout: 15000 },
     );
+  }
+  history(customer: number, page: number) {
+    return this.db.page(Prisma.sql`SELECT o.id,o.order_date,o.delivery_status,o.total_amount,
+      r.name AS restaurant,p.method AS payment_method,p.refunded_at AS payment_refunded_at
+      FROM orders o JOIN restaurants r ON r.id=o.restaurant_id LEFT JOIN payments p ON p.order_id=o.id
+      WHERE o.customer_id=${customer} ORDER BY o.order_date DESC,o.id DESC`, page);
   }
   async recent(ids: number[], customer: number) {
     return this.db
@@ -290,11 +310,12 @@ export class OrdersService {
       );
     return { id };
   }
-  changeAddress(id: number, input: unknown) {
+  changeAddress(id: number, input: unknown, adminEdit = false) {
     const b = object(input);
     const expected = integer(b.expected_version, "expected_version", 0);
     const address = text(b.delivery_address, "delivery_address", 200);
     const position = optionalCoordinates(b);
+    const note = adminEdit ? text(b.delivery_note ?? "", "delivery_note", 500, 0) : undefined;
     return this.db.$transaction(async (tx) => {
       const old = await this.lockOrder(tx, id);
       if (!['створено','готується'].includes(old.delivery_status) || old.courier_id !== null)
@@ -305,13 +326,28 @@ export class OrdersService {
         where: {id},
         data: {
           delivery_address: address,
-          delivery_latitude: position?.latitude ?? null,
-          delivery_longitude: position?.longitude ?? null,
+          delivery_latitude: position?.latitude ?? (adminEdit && address === old.delivery_address ? old.delivery_latitude : null),
+          delivery_longitude: position?.longitude ?? (adminEdit && address === old.delivery_address ? old.delivery_longitude : null),
+          ...(note !== undefined ? { delivery_note: note } : {}),
           address_version: {increment:1},
         },
         select: {id:true,delivery_address:true,delivery_latitude:true,delivery_longitude:true,address_version:true},
       });
     }, {maxWait:10000,timeout:15000});
+  }
+  private canDelete(order: Pick<Order, "delivery_status" | "courier_id">) {
+    return ["створено", "скасовано"].includes(order.delivery_status) && order.courier_id === null;
+  }
+  remove(id: number) {
+    return this.db.$transaction(async (tx) => {
+      const order = await this.lockOrder(tx, id);
+      const eligible = this.canDelete(order) && await tx.order.findFirst({
+        where: { id, payment: null, review: null, checkout_request: null, delivery_messages: { none: {} } },
+        select: { id: true },
+      });
+      if (!eligible) throw new HttpError(409, "Це замовлення входить до історії або ще виконується. Видалення недоступне.");
+      return tx.order.delete({ where: { id }, select: { id: true } });
+    });
   }
   updateCourierLocation(id: number, input: unknown) {
     const b = object(input);

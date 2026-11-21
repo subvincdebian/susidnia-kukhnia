@@ -1,4 +1,5 @@
 import type { PGliteInterface } from "@electric-sql/pglite";
+import { tableOrder } from "./validation.ts";
 import { createOrders } from "./orders.ts";
 import { createBrowserAuth, memoryTokenStore, type BrowserTokenStore, type BrowserUser } from "./auth.ts";
 import { jsonValue, one, page, rows, type Row } from "./sql.ts";
@@ -42,12 +43,13 @@ export function createBrowserApi(db: PGliteInterface, tokenStore: BrowserTokenSt
   function restaurantList(query: Record<string, unknown>) {
     const { q, page: requestedPage } = filters(query);
     const search=catalogSearch(q);
+    const order = tableOrder(query.sort, { name: "r.name", cuisine: "r.cuisine_type" }, "r.is_active DESC,r.name");
     return page(db, `SELECT r.*,(SELECT COUNT(*) FROM menu_items WHERE restaurant_id=r.id) AS dishes_count,
       (SELECT ROUND(AVG(v.rating),2) FROM reviews v JOIN orders o ON o.id=v.order_id WHERE o.restaurant_id=r.id) AS review_rating,
       ${search.count} AS matched_dishes_count,
       COALESCE((SELECT jsonb_agg(to_jsonb(matched)||jsonb_build_object('price',matched.price::text)) FROM
         (SELECT m.* FROM menu_items m WHERE length($1)>0 AND m.restaurant_id=r.id AND ${search.dish} ORDER BY m.price,m.name,m.id LIMIT 3) matched),'[]'::jsonb) AS matched_dishes
-      FROM restaurants r WHERE ${search.where} ORDER BY r.is_active DESC,r.name,r.id`, [search.needle], requestedPage);
+      FROM restaurants r WHERE ${search.where} ORDER BY ${order},r.id`, [search.needle], requestedPage);
   }
   function menuList(query: Record<string,unknown>) {
     const input=dishFilters(query),search=catalogSearch(input.q);
@@ -110,8 +112,9 @@ export function createBrowserApi(db: PGliteInterface, tokenStore: BrowserTokenSt
   }
   function customerList(query: Record<string, unknown>) {
     const { q, page: requestedPage } = filters(query);
+    const order = tableOrder(query.sort, { name: "full_name", phone: "phone", email: "email", address: "default_delivery_address" }, "full_name");
     return page(db, `SELECT id,full_name,email,phone,default_delivery_address FROM customers
-      WHERE full_name ILIKE $1 OR phone ILIKE $1 OR COALESCE(email,'') ILIKE $1 ORDER BY full_name,id`, ["%" + q + "%"], requestedPage);
+      WHERE full_name ILIKE $1 OR phone ILIKE $1 OR COALESCE(email,'') ILIKE $1 ORDER BY ${order},id`, ["%" + q + "%"], requestedPage);
   }
   function customerCreate(input: unknown) {
     const body = object(input), email = text(body.email, "email", 100).toLowerCase();
@@ -121,12 +124,13 @@ export function createBrowserApi(db: PGliteInterface, tokenStore: BrowserTokenSt
   function courierList(query: Record<string, unknown>) {
     const { q, status, page: requestedPage } = filters(query);
     if (!["", "available", "busy", "inactive"].includes(status)) fail(400, "Невідомий статус кур’єра");
+    const order = tableOrder(query.sort, { name: "c.full_name", phone: "c.phone", vehicle: "c.vehicle_type", status: "CASE WHEN NOT c.is_active THEN 3 WHEN EXISTS(SELECT 1 FROM orders o WHERE o.courier_id=c.id AND o.delivery_status='в дорозі') THEN 2 WHEN c.is_available THEN 0 ELSE 1 END" }, "c.is_active DESC,c.full_name");
     return page(db, `SELECT c.*,(SELECT COUNT(*)::integer FROM orders o WHERE o.courier_id=c.id) AS orders_count,
       (SELECT COUNT(*)::integer FROM orders o WHERE o.courier_id=c.id AND o.delivery_status='в дорозі') AS active_orders_count
       FROM couriers c WHERE (c.full_name ILIKE $1 OR c.phone ILIKE $1)
       AND ($2='' OR ($2='inactive' AND NOT c.is_active) OR ($2='available' AND c.is_active AND c.is_available)
         OR ($2='busy' AND c.is_active AND EXISTS(SELECT 1 FROM orders o WHERE o.courier_id=c.id AND o.delivery_status='в дорозі')))
-      ORDER BY c.is_active DESC,c.full_name,c.id`, ["%" + q + "%", status], requestedPage);
+      ORDER BY ${order},c.id`, ["%" + q + "%", status], requestedPage);
   }
   async function courierDelivery(id: number) {
     const courier = await one(db, "SELECT * FROM couriers WHERE id=$1", [id], "Кур’єра не знайдено");
@@ -214,7 +218,7 @@ export function createBrowserApi(db: PGliteInterface, tokenStore: BrowserTokenSt
           if (!(await rows(db, "SELECT id FROM orders WHERE id=$1 AND customer_id=$2", [orderId, user.customer_id])).length)
             fail(404, "Замовлення не знайдено");
         };
-        if (resource === "orders" && segments.length === 2 && (method === "GET" && rawId === "recent" || method === "POST" && rawId === "checkout")) {
+        if (resource === "orders" && segments.length === 2 && (method === "GET" && (rawId === "recent" || rawId === "history") || method === "POST" && rawId === "checkout")) {
           // The scoped handlers below bind both history and checkout to this account.
         } else if (resource === "orders" && (method === "GET" && segments.length === 2
           || segments.length === 3 && (method === "GET" && operation === "messages"
@@ -252,6 +256,7 @@ export function createBrowserApi(db: PGliteInterface, tokenStore: BrowserTokenSt
       if (segments.length === 2) {
         if (resource === "restaurants" && rawId === "map") return restaurantMap(query);
         if (resource === "restaurants") return restaurantGet(id());
+        if (resource === "orders" && rawId === "history" && user) return orders.history(query, user.customer_id);
         if (resource === "orders" && rawId === "recent" && user) return orders.recent(query, user.customer_id);
         if (resource === "orders") return orders.get(id());
       }
@@ -278,6 +283,7 @@ export function createBrowserApi(db: PGliteInterface, tokenStore: BrowserTokenSt
         if (resource === "menu") return menuSave(id(), body);
         if (resource === "reviews") return reviewSave(id(), body);
         if (resource === "couriers") return one(db, "UPDATE couriers SET full_name=$1,phone=$2,vehicle_type=$3 WHERE id=$4 RETURNING *", [...courierFields(body), id()]);
+        if (resource === "orders") return orders.changeAddress(id(), body, true);
       }
       if (resource === "couriers" && operation === "restore") return courierRestore(id());
       if (resource === "orders" && operation === "status") return orders.changeStatus(id(), body);
@@ -287,6 +293,7 @@ export function createBrowserApi(db: PGliteInterface, tokenStore: BrowserTokenSt
     if (method === "DELETE" && segments.length === 2) {
       if (resource === "couriers") return courierRemove(id());
       if (resource === "reviews") return one(db, "DELETE FROM reviews WHERE id=$1 RETURNING id", [id()]);
+      if (resource === "orders") return orders.remove(id());
     }
     fail(404, "Сторінку не знайдено");
   }

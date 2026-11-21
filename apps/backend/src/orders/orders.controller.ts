@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, Inject, Param, Patch, Post, Query, Req } from '@nestjs/common';
+import { Body, Controller, Delete, Get, HttpCode, Inject, Param, Patch, Post, Query, Req } from '@nestjs/common';
 import type { FastifyRequest } from 'fastify';
 import { filters, integer, object, text, HttpError } from '../common/validation.js';
 import { Authenticated } from '../auth/auth.guard.js';
@@ -12,7 +12,12 @@ export class OrdersController {
     await this.auth.requireOrder(currentUser(request),id);
     return id;
   }
-  @Get() list(@Query() query: unknown) { return this.service.list(filters(query)); }
+  @Get() list(@Query() query: unknown) { const fields = object(query);
+    const idFilter = (key: string) => fields[key] ? integer(Number(fields[key]), key) : null;
+    return this.service.list({ ...filters(query), sort: fields.sort, customerId: idFilter('customer_id'), restaurantId: idFilter('restaurant_id') }); }
+  @Authenticated() @Get('history') history(@Query() query: unknown, @Req() request: FastifyRequest) {
+    return this.service.history(currentUser(request).customer_id, filters(query).page);
+  }
   @Authenticated() @Get('recent') recent(@Query() query: unknown,@Req() request: FastifyRequest) {
     const raw = text(object(query).ids ?? '', 'ids', 360, 0);
     const values = raw ? raw.split(',') : [];
@@ -26,6 +31,8 @@ export class OrdersController {
   @Authenticated() @Post(':id/payment') @HttpCode(200) async pay(@Param('id') id: string,@Body() body: unknown,@Req() request: FastifyRequest) { return this.service.pay(await this.owned(request,id),body); }
   @Authenticated() @Patch(':id/note') async note(@Param('id') id: string,@Body() body: unknown,@Req() request: FastifyRequest) { return this.service.saveNote(await this.owned(request,id),body); }
   @Authenticated() @Patch(':id/address') async address(@Param('id') id: string,@Body() body: unknown,@Req() request: FastifyRequest) { return this.service.changeAddress(await this.owned(request,id),body); }
+  @Patch(':id') edit(@Param('id') id: string,@Body() body: unknown) { return this.service.changeAddress(integer(Number(id),'id'),body,true); }
+  @Delete(':id') remove(@Param('id') id: string) { return this.service.remove(integer(Number(id),'id')); }
   @Post(':id/courier-location') @HttpCode(200) location(@Param('id') id: string,@Body() body: unknown) { return this.service.updateCourierLocation(integer(Number(id),'id'),body); }
   @Authenticated() @Get(':id/messages') async messages(@Param('id') id: string,@Req() request: FastifyRequest) { return this.service.messages(await this.owned(request,id)); }
   @Authenticated() @Post(':id/messages') @HttpCode(200) async message(@Param('id') id: string,@Body() body: unknown,@Req() request: FastifyRequest) {

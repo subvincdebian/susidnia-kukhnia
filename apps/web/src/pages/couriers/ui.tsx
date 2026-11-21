@@ -9,7 +9,8 @@ import { Async, Empty, Field, Heading, Pagination, Search, Table, PageLink } fro
 export function CouriersPage({ onDialog }: { onDialog: (state: DialogState) => void }) {
   const params = useLocationParams();
   const q = params.get("q") ?? "", status = params.get("status") ?? "", page = params.get("page") ?? "1";
-  const resource = useResource<Page<Courier>>(`/couriers?${new URLSearchParams({ q, status, page })}`);
+  const sort = params.get("sort") ?? "";
+  const resource = useResource<Page<Courier>>(`/couriers?${new URLSearchParams({ q, status, page, sort })}`);
   const reset = () => navigate({ q: null, status: null, page: null }, true);
   useEffect(() => {
     if (resource.data && Number(page) !== resource.data.page) navigate({ page: resource.data.page }, true);
@@ -26,6 +27,9 @@ export function CouriersPage({ onDialog }: { onDialog: (state: DialogState) => v
     </div>
     <Async resource={resource}>{(data) => <>
       {data.items.length ? <Table label="Кур'єри" headers={["Кур'єр", "Телефон", "Транспорт", "Статус", "Дії"]}
+        sortKeys={["name", "phone", "vehicle", "status", null]} sort={sort}
+        onSort={(value) => navigate({ sort: value, page: null })}
+        rowKeys={data.items.map(({ id }) => id)}
         rows={data.items.map((courier) => [courier.full_name, <a href={`tel:${courier.phone}`}>{courier.phone}</a>, courier.vehicle_type,
           <span className={`status ${!courier.is_active ? "" : courier.is_available ? "green" : "amber"}`}>{!courier.is_active ? "Неактивний" : courier.active_orders_count ? "На доставці" : courier.is_available ? "Вільний" : "Недоступний"}</span>,
           <div className="actions">

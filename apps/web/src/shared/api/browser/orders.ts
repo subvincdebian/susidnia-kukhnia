@@ -1,4 +1,5 @@
 import type { PGliteInterface } from "@electric-sql/pglite";
+import { tableOrder } from "./validation.ts";
 import { one, page, rows, type Row, type SqlClient } from "./sql.ts";
 import { checkoutInput, coordinates, fail, filters, integer, minorUnits, object, optionalCoordinates, orderInput, statuses, text, type OrderInput } from "./validation.ts";
 
@@ -7,6 +8,9 @@ interface OrderRow extends Row {
   courier_id: number | null;
   delivery_status: string;
   address_version: number;
+  delivery_address: string;
+  delivery_latitude: number | null;
+  delivery_longitude: number | null;
 }
 interface DishRow { id: number; restaurant_id: number; is_available: boolean; price: string }
 async function lockOrder(db: SqlClient, id: number) {
@@ -17,6 +21,17 @@ function requireDelivery(order: OrderRow, courier?: number) {
     fail(409, "Дія доступна після передавання кур'єру й до завершення доставки");
   if (courier !== undefined && order.courier_id !== courier)
     fail(409, "Цей кур'єр не виконує замовлення");
+}
+function canDelete(order: OrderRow) {
+  return ["створено", "скасовано"].includes(order.delivery_status) && order.courier_id === null;
+}
+async function hasProtectedHistory(db: SqlClient, id: number) {
+  const { protected_history } = await one<{ protected_history: boolean }>(db, `SELECT
+    EXISTS(SELECT 1 FROM payments WHERE order_id=$1)
+    OR EXISTS(SELECT 1 FROM reviews WHERE order_id=$1)
+    OR EXISTS(SELECT 1 FROM _checkout_requests WHERE order_id=$1)
+    OR EXISTS(SELECT 1 FROM delivery_messages WHERE order_id=$1) AS protected_history`, [id]);
+  return protected_history;
 }
 async function persistOrder(db: SqlClient, customer: number, input: OrderInput, recipient?: { name: string; phone: string }, expectedTotal?: string) {
   const restaurant = await rows<{ is_active: boolean }>(db, "SELECT is_active FROM restaurants WHERE id=$1 FOR SHARE", [input.restaurant]);
@@ -48,11 +63,22 @@ export function createOrders(db: PGliteInterface) {
     list(query: Record<string, unknown>) {
       const { q, status, page: requestedPage } = filters(query);
       if (status && !statuses.includes(status)) fail(400, "Невідомий статус");
+      const customer = query.customer_id ? integer(Number(query.customer_id), "customer_id") : null;
+      const restaurant = query.restaurant_id ? integer(Number(query.restaurant_id), "restaurant_id") : null;
+      const order = tableOrder(query.sort, { id: "o.id", date: "o.order_date", customer: "c.full_name", restaurant: "r.name", status: "o.delivery_status", total: "o.total_amount", courier: "co.full_name" }, "o.order_date DESC");
       return page(db, `SELECT o.*,c.full_name AS customer,r.name AS restaurant,co.full_name AS courier,p.method AS payment_method,p.refunded_at AS payment_refunded_at
         FROM orders o JOIN customers c ON c.id=o.customer_id JOIN restaurants r ON r.id=o.restaurant_id
         LEFT JOIN couriers co ON co.id=o.courier_id LEFT JOIN payments p ON p.order_id=o.id
-        WHERE ($1='' OR o.delivery_status=$1) AND (c.full_name ILIKE $2 OR r.name ILIKE $2 OR o.id::text ILIKE $2)
-        ORDER BY o.order_date DESC,o.id DESC`, [status, "%" + q + "%"], requestedPage);
+        WHERE ($1='' OR o.delivery_status=$1)
+        AND ($3::integer IS NULL OR o.customer_id=$3) AND ($4::integer IS NULL OR o.restaurant_id=$4)
+        AND (c.full_name ILIKE $2 OR r.name ILIKE $2 OR o.id::text ILIKE $2)
+        ORDER BY ${order},o.id DESC`, [status, "%" + q + "%", customer, restaurant], requestedPage);
+    },
+    history(query: Record<string, unknown>, customerId: number) {
+      return page(db, `SELECT o.id,o.order_date,o.delivery_status,o.total_amount,
+        r.name AS restaurant,p.method AS payment_method,p.refunded_at AS payment_refunded_at
+        FROM orders o JOIN restaurants r ON r.id=o.restaurant_id LEFT JOIN payments p ON p.order_id=o.id
+        WHERE o.customer_id=$1 ORDER BY o.order_date DESC,o.id DESC`, [customerId], filters(query).page);
     },
     recent(query: Record<string, unknown>, customerId: number) {
       const raw = text(query.ids ?? "", "ids", 360, 0);
@@ -72,7 +98,7 @@ export function createOrders(db: PGliteInterface) {
       const items = await rows(db, "SELECT i.*,m.name FROM order_items i JOIN menu_items m ON m.id=i.menu_item_id WHERE i.order_id=$1 ORDER BY i.id", [id]);
       const [payment] = await rows(db, "SELECT * FROM payments WHERE order_id=$1", [id]);
       const [review] = await rows(db, "SELECT * FROM reviews WHERE order_id=$1", [id]);
-      return { ...order, items, payment: payment ?? null, review: review ?? null };
+      return { ...order, items, payment: payment ?? null, review: review ?? null, can_delete: canDelete(order) && !await hasProtectedHistory(db, id) };
     },
     create(input: unknown) {
       const body = object(input), customer = integer(body.customer_id, "customer_id"), order = orderInput(body);
@@ -133,15 +159,28 @@ export function createOrders(db: PGliteInterface) {
       if (!changed.length) fail(409, "Примітку завершеного замовлення змінювати не можна");
       return { id };
     },
-    changeAddress(id: number, input: unknown) {
+    changeAddress(id: number, input: unknown, adminEdit = false) {
       const body = object(input), expected = integer(body.expected_version, "expected_version", 0), address = text(body.delivery_address, "delivery_address", 200), position = optionalCoordinates(body);
+      const note = adminEdit ? text(body.delivery_note ?? "", "delivery_note", 500, 0) : null;
       return db.transaction(async (tx) => {
         const old = await lockOrder(tx, id);
         if (!["створено", "готується"].includes(old.delivery_status) || old.courier_id !== null)
           fail(409, "Адресу можна змінити лише до передавання кур'єру");
         if (old.address_version !== expected) fail(409, "Адресу вже змінено. Оновіть замовлення перед редагуванням");
-        return one(tx, `UPDATE orders SET delivery_address=$1,delivery_latitude=$2,delivery_longitude=$3,address_version=address_version+1
-          WHERE id=$4 RETURNING id,delivery_address,delivery_latitude,delivery_longitude,address_version`, [address, position?.latitude ?? null, position?.longitude ?? null, id]);
+        const sameAddress = adminEdit && address === old.delivery_address;
+        const latitude = position?.latitude ?? (sameAddress ? old.delivery_latitude : null);
+        const longitude = position?.longitude ?? (sameAddress ? old.delivery_longitude : null);
+        return one(tx, `UPDATE orders SET delivery_address=$1,delivery_latitude=$2,delivery_longitude=$3,
+          delivery_note=COALESCE($5::text,delivery_note),address_version=address_version+1
+          WHERE id=$4 RETURNING id,delivery_address,delivery_latitude,delivery_longitude,address_version`, [address, latitude, longitude, id, note]);
+      });
+    },
+    remove(id: number) {
+      return db.transaction(async (tx) => {
+        const order = await lockOrder(tx, id);
+        if (!canDelete(order) || await hasProtectedHistory(tx, id))
+          fail(409, "Це замовлення входить до історії або ще виконується. Видалення недоступне.");
+        return one(tx, "DELETE FROM orders WHERE id=$1 RETURNING id", [id]);
       });
     },
     updateCourierLocation(id: number, input: unknown) {

@@ -1,13 +1,14 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { Prisma } from "../generated/prisma/client.js";
 import { PrismaService } from "../prisma/prisma.service.js";
-import { HttpError, object, phone, text } from "../common/validation.js";
+import { HttpError, object, phone, tableOrder, text } from "../common/validation.js";
 @Injectable()
 export class CustomersService {
   constructor(@Inject(PrismaService) private readonly db: PrismaService) {}
-  list({ q = "", page = 1 }: { q?: string; page?: number }) {
+  list({ q = "", page = 1 }: { q?: string; page?: number }, sort?: unknown) {
+    const order = tableOrder(sort, { name: "full_name", phone: "phone", email: "email", address: "default_delivery_address" }, "full_name");
     return this.db.page(
-      Prisma.sql`SELECT id,full_name,email,phone,default_delivery_address FROM customers WHERE full_name ILIKE ${"%" + q + "%"} OR phone ILIKE ${"%" + q + "%"} OR COALESCE(email,'') ILIKE ${"%" + q + "%"} ORDER BY full_name,id`,
+      Prisma.sql`SELECT id,full_name,email,phone,default_delivery_address FROM customers WHERE full_name ILIKE ${"%" + q + "%"} OR phone ILIKE ${"%" + q + "%"} OR COALESCE(email,'') ILIKE ${"%" + q + "%"} ORDER BY ${Prisma.raw(order)},id`,
       page,
     );
   }

@@ -117,34 +117,78 @@ export function Async<T>({
     </div>
   );
 }
+const tableCollator = new Intl.Collator("uk", { numeric: true, sensitivity: "base" });
+
 export function Table({
   headers,
   rows,
   label,
+  sortKeys,
+  sortValues = rows,
+  rowKeys,
+  rowHeader,
+  sort: controlledSort,
+  onSort,
 }: {
   headers: string[];
   rows: ReactNode[][];
   label: string;
+  sortKeys?: (string | null)[];
+  sortValues?: ReactNode[][];
+  rowKeys?: (string | number)[];
+  rowHeader?: number;
+  sort?: string;
+  onSort?: (sort: string) => void;
 }) {
+  const [localSort, setLocalSort] = useState("");
+  const sort = controlledSort ?? localSort;
+  const keyAt = (index: number) => sortKeys ? sortKeys[index] : String(index);
+  const sortColumn = headers.findIndex((_, index) =>
+    Boolean(keyAt(index) && (sort === keyAt(index) + "_asc" || sort === keyAt(index) + "_desc")));
+  const descending = sort.endsWith("_desc");
+  const ordered = rows.map((row, index) => ({ row, index }));
+  if (!onSort && sortColumn >= 0) {
+    ordered.sort((a, b) => {
+      const left = sortValues[a.index]?.[sortColumn];
+      const right = sortValues[b.index]?.[sortColumn];
+      if (left == null || right == null) return Number(left == null) - Number(right == null);
+      const result = typeof left === "number" && typeof right === "number"
+        ? left - right
+        : tableCollator.compare(String(left), String(right));
+      return descending ? -result : result;
+    });
+  }
   return (
     <div className="table-frame">
-      <div className="table-scroll">
+      <div className="table-scroll" role="region" aria-label={label} tabIndex={0}>
         <table aria-label={label}>
           <thead>
             <tr>
-              {headers.map((header, index) => (
-                <th scope="col" key={`${header}-${index}`}>
-                  {header}
-                </th>
-              ))}
+              {headers.map((header, index) => {
+                const key = keyAt(index);
+                const active = sortColumn === index;
+                const direction = active ? (descending ? "descending" : "ascending") : undefined;
+                const next = active && !descending ? "_desc" : "_asc";
+                return (
+                  <th scope="col" key={index} aria-sort={direction}>
+                    {key == null ? header : (
+                      <button type="button" className="table-sort"
+                        aria-label={header + (next === "_asc" ? ": за зростанням" : ": за спаданням")}
+                        onClick={() => (onSort ?? setLocalSort)(key + next)}>
+                        {header}<span aria-hidden="true">{active ? (descending ? "↓" : "↑") : "↕"}</span>
+                      </button>
+                    )}
+                  </th>
+                );
+              })}
             </tr>
           </thead>
           <tbody>
-            {rows.map((row, index) => (
-              <tr key={index}>
-                {row.map((cell, cellIndex) => (
-                  <td key={cellIndex}>{cell}</td>
-                ))}
+            {ordered.map(({ row, index }) => (
+              <tr key={rowKeys?.[index] ?? index}>
+                {row.map((cell, cellIndex) => cellIndex === rowHeader
+                  ? <th key={cellIndex} scope="row">{cell}</th>
+                  : <td key={cellIndex}>{cell}</td>)}
               </tr>
             ))}
           </tbody>

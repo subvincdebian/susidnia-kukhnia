@@ -22,9 +22,56 @@ before(async () => {
   dish = (await db.query("SELECT m.id,m.restaurant_id,m.price FROM menu_items m JOIN restaurants r ON r.id=m.restaurant_id WHERE m.is_available AND r.is_active ORDER BY m.id LIMIT 1")).rows[0];
 });
 after(async () => { await db?.close(); });
+test("admin lists sort before pagination and filter orders by customer and restaurant", async () => {
+  const first = await admin.request("/orders?sort=total_asc");
+  const second = await admin.request("/orders?sort=total_asc&page=2");
+  const expected = (await db.query("SELECT id FROM orders ORDER BY total_amount ASC,id DESC LIMIT 20")).rows.map(({ id }) => id);
+  assert.equal(first.items.length, 10);
+  assert.deepEqual([...first.items, ...second.items].map(({ id }) => id), expected);
+  const order = first.items[0];
+  const result = await admin.request(`/orders?customer_id=${order.customer_id}&restaurant_id=${order.restaurant_id}&sort=restaurant_desc`);
+  assert.ok(result.items.some(({ id }) => id === order.id));
+  assert.ok(result.items.every((row) => row.customer_id === order.customer_id && row.restaurant_id === order.restaurant_id));
+  for (const [route, sql] of [
+    ["/customers?sort=name_desc", "SELECT id FROM customers ORDER BY full_name DESC,id LIMIT 10"],
+    ["/couriers?sort=vehicle_asc", "SELECT id FROM couriers ORDER BY vehicle_type ASC,id LIMIT 10"],
+    ["/restaurants?sort=name_desc", "SELECT id FROM restaurants ORDER BY name DESC,id LIMIT 10"],
+  ]) {
+    const expectedIds = (await db.query(sql)).rows.map(({ id }) => id);
+    assert.deepEqual((await admin.request(route)).items.map(({ id }) => id), expectedIds);
+  }
+});
 const registration = (suffix, extra = {}) => ({ email: `browser-${suffix}@example.test`, password: "UserDemo2026!", full_name: `Гість ${suffix}`, phone: `+38000088${suffix}`, ...extra });
 const checkout = (key, extra = {}) => ({ request_key: key.repeat(64), full_name: "Одержувач", phone: "+380000776655", restaurant_id: dish.restaurant_id,
   delivery_address: "Київ, Хрещатик, 1", payment_method: "картка", expected_total: dish.price, items: [{ menu_item_id: dish.id, quantity: 1 }], ...extra });
+
+test("admins can edit delivery details and remove manual drafts without erasing customer history", async () => {
+  const customer = createBrowserApi(db, memoryTokenStore());
+  const { user } = await customer.request("/auth/login", "POST", { email: "user@demo.test", password: "UserDemo2026!" });
+  const payload = checkout("e", { payment_method: "готівка", delivery_latitude: 50.45, delivery_longitude: 30.52 });
+  const { id } = await admin.request("/orders", "POST", { ...payload, customer_id: user.customer_id });
+  const path = `/orders/${id}`;
+  const change = { expected_version: 0, delivery_address: payload.delivery_address, delivery_note: "Біля входу" };
+  await assert.rejects(customer.request(path, "PATCH", change), denied(403));
+  await assert.rejects(customer.request(path, "DELETE"), denied(403));
+  await admin.request(path, "PATCH", change);
+  const saved = await admin.request(path);
+  assert.equal(saved.delivery_note, change.delivery_note);
+  assert.equal(saved.delivery_latitude, 50.45);
+  assert.equal(saved.can_delete, true);
+  await assert.rejects(admin.request(path, "PATCH", change), denied(409));
+  await admin.request(path, "PATCH", { ...change, expected_version: saved.address_version, delivery_address: "Київ, Хрещатик, 5" });
+  assert.equal((await admin.request(path)).delivery_latitude, null);
+  await admin.request(path + "/status", "PATCH", { status: "скасовано", expected_status: "створено" });
+  assert.deepEqual(await admin.request(path, "DELETE"), { id });
+  await assert.rejects(admin.request(path), denied(404));
+  assert.equal((await db.query("SELECT id FROM order_items WHERE order_id=$1", [id])).rows.length, 0);
+
+  const checkoutOrder = await customer.request("/orders/checkout", "POST", payload);
+  assert.equal((await admin.request(`/orders/${checkoutOrder.id}`)).can_delete, false);
+  await assert.rejects(admin.request(`/orders/${checkoutOrder.id}`, "DELETE"), denied(409));
+  assert.deepEqual(await customer.request("/orders/checkout", "POST", payload), checkoutOrder);
+});
 
 test("browser auth protects routes and bootstrap; registration cannot claim a role or old contact", async () => {
   const guest = createBrowserApi(db);
@@ -64,6 +111,8 @@ test("browser auth scopes history, checkout retries, address, payment, messages 
   const bOrder = await second.request("/orders/checkout", "POST", bPayload);
   assert.notEqual(bOrder.id, order.id);
   assert.equal((await first.request("/orders/recent")).length, 1);
+  assert.deepEqual((await first.request("/orders/history")).items.map(({ id }) => id), [order.id]);
+  assert.deepEqual((await second.request("/orders/history")).items.map(({ id }) => id), [bOrder.id]);
   assert.deepEqual(await second.request(`/orders/recent?ids=${order.id}`), []);
   for (const [path, method, body] of [
     [`/orders/${order.id}`, "GET"], [`/orders/${order.id}/messages`, "GET"],

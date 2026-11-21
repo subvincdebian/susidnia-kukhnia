@@ -48,6 +48,8 @@ export function openPage(
     sort: null,
     max_price: null,
     restaurant_id: null,
+    customer_id: null,
+    restaurant_sort: null,
     compare: null,
     status: null,
     page: null,

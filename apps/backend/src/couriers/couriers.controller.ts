@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, HttpCode, Inject, Param, Patch, Post, Query } from '@nestjs/common';
 import { Prisma, type Courier } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { HttpError, filters, integer, object, phone, text } from '../common/validation.js';
+import { HttpError, filters, integer, object, phone, tableOrder, text } from '../common/validation.js';
 
 @Controller('api/couriers')
 export class CouriersController {
@@ -9,12 +9,13 @@ export class CouriersController {
   @Get() list(@Query() query: unknown) {
     const {q,status,page}=filters(query);
     if(!['','available','busy','inactive'].includes(status))throw new HttpError(400,'Невідомий статус кур’єра');
+    const order = tableOrder(object(query).sort, { name: "c.full_name", phone: "c.phone", vehicle: "c.vehicle_type", status: "CASE WHEN NOT c.is_active THEN 3 WHEN EXISTS(SELECT 1 FROM orders o WHERE o.courier_id=c.id AND o.delivery_status='в дорозі') THEN 2 WHEN c.is_available THEN 0 ELSE 1 END" }, "c.is_active DESC,c.full_name");
     return this.db.page(Prisma.sql`SELECT c.*,(SELECT COUNT(*)::integer FROM orders o WHERE o.courier_id=c.id) AS orders_count,(SELECT COUNT(*)::integer FROM orders o WHERE o.courier_id=c.id AND o.delivery_status='в дорозі') AS active_orders_count
       FROM couriers c WHERE (c.full_name ILIKE ${'%'+q+'%'} OR c.phone ILIKE ${'%'+q+'%'})
       AND (${status}='' OR (${status}='inactive' AND NOT c.is_active)
         OR (${status}='available' AND c.is_active AND c.is_available)
         OR (${status}='busy' AND c.is_active AND EXISTS(SELECT 1 FROM orders o WHERE o.courier_id=c.id AND o.delivery_status='в дорозі')))
-      ORDER BY c.is_active DESC,c.full_name,c.id`,page);
+      ORDER BY ${Prisma.raw(order)},c.id`,page);
   }
   @Get(':id/delivery') async delivery(@Param('id') value: string) {
     const id=integer(Number(value),'id');

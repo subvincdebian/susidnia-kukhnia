@@ -50,3 +50,12 @@ export function phone(value: unknown): string {
   if(!/^\+?[\d ()-]{7,20}$/.test(p))throw new HttpError(400,'Перевірте телефон',{phone:'Вкажіть номер телефону'});
   return p;
 }
+
+export function tableOrder(input: unknown, columns: Record<string, string>, fallback: string) {
+  if (typeof input !== "string") return fallback;
+  const match = /^([a-z_]+)_(asc|desc)$/.exec(input);
+  const key = match?.[1];
+  if (!key || !Object.hasOwn(columns, key)) return fallback;
+  const direction = match?.[2] === "asc" ? "ASC" : "DESC";
+  return columns[key] + " " + direction + " NULLS LAST";
+}

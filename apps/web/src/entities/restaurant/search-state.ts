@@ -3,6 +3,7 @@ const catalogKeys = new Set([
   "page",
   "display",
   "sort",
+  "restaurant_sort",
   "max_price",
   "restaurant_id",
   "compare",

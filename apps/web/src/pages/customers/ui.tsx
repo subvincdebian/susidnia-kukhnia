@@ -7,6 +7,7 @@ import {
   Empty,
   Heading,
   Pagination,
+  PageLink,
   Search,
   Table,
 } from "../../shared/ui";
@@ -20,9 +21,10 @@ interface Customer {
 export function CustomersPage({ onAdd }: { onAdd: () => void }) {
   const params = useLocationParams(),
     q = params.get("q") ?? "",
+    sort = params.get("sort") || "name_asc",
     page = params.get("page") ?? "1";
   const resource = useResource<Page<Customer>>(
-    `/customers?${new URLSearchParams({ q, page })}`,
+    `/customers?${new URLSearchParams({ q, page, sort })}`,
   );
   useEffect(() => {
     if (resource.data && Number(page) !== resource.data.page)
@@ -53,17 +55,25 @@ export function CustomersPage({ onAdd }: { onAdd: () => void }) {
             {data.items.length ? (
               <Table
                 label="Клієнти"
+                sortKeys={["name", "phone", "email", "address", null]}
+                sort={sort}
+                onSort={(value) => navigate({ sort: value, page: null })}
+                rowKeys={data.items.map(({ id }) => id)}
                 headers={[
                   "Клієнт",
                   "Телефон",
                   "Email",
                   "Адреса за замовчуванням",
+                  "Замовлення",
                 ]}
                 rows={data.items.map((customer) => [
                   customer.full_name,
                   customer.phone,
                   customer.email ?? "Не вказано",
                   customer.default_delivery_address,
+                  <PageLink view="orders" params={{ customer_id: customer.id }}>
+                    Усі замовлення<span className="sr-only">: {customer.full_name}</span>
+                  </PageLink>,
                 ])}
               />
             ) : (

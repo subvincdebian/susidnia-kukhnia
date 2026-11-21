@@ -1,11 +1,11 @@
 import { Body, Controller, Get, HttpCode, Inject, Param, Patch, Post, Query } from '@nestjs/common';
-import { dishFilters, filters, integer } from '../common/validation.js';
+import { dishFilters, filters, integer, object } from '../common/validation.js';
 import { RestaurantsService } from './restaurants.service.js';
 import { Public } from '../auth/auth.guard.js';
 @Controller('api')
 export class RestaurantsController {
   constructor(@Inject(RestaurantsService) private readonly service: RestaurantsService) {}
-  @Public() @Get('restaurants') list(@Query() query: unknown) { return this.service.list(filters(query)); }
+  @Public() @Get('restaurants') list(@Query() query: unknown) { return this.service.list(filters(query), object(query).sort); }
   @Public() @Get('menu') menu(@Query() query: unknown) { return this.service.menu(dishFilters(query)); }
   @Public() @Get('restaurants/map') map(@Query() query: unknown) { return this.service.map(filters(query).q); }
   @Public() @Get('restaurants/:id') get(@Param('id') id: string) { return this.service.get(integer(Number(id),'id')); }

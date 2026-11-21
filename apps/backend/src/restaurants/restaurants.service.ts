@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Prisma } from '../generated/prisma/client.js';
 import { PrismaService } from '../prisma/prisma.service.js';
-import { dishFilters, flag, HttpError, integer, money, object, phone, text } from '../common/validation.js';
+import { dishFilters, flag, HttpError, integer, money, object, phone, tableOrder, text } from '../common/validation.js';
 
 @Injectable()
 export class RestaurantsService {
@@ -25,14 +25,15 @@ export class RestaurantsService {
       r.source_checked_at,r.source_note,r.menu_url AS restaurant_menu_url FROM menu_items m JOIN restaurants r ON r.id=m.restaurant_id
       WHERE r.is_active AND m.is_available AND ${search.offer} ${budget} ${restaurant} ${ids} ORDER BY ${order}`,input.page);
   }
-  list({q='',page=1}: {q?:string;page?:number}) {
+  list({q='',page=1}: {q?:string;page?:number}, sort?: unknown) {
+    const order = tableOrder(sort, { name: "r.name", cuisine: "r.cuisine_type" }, 'r.is_active DESC,r.name');
     const search=this.search(q);
     return this.db.page(Prisma.sql`SELECT r.*,(SELECT COUNT(*) FROM menu_items WHERE restaurant_id=r.id) AS dishes_count,
       (SELECT ROUND(AVG(v.rating),2) FROM reviews v JOIN orders o ON o.id=v.order_id WHERE o.restaurant_id=r.id) AS review_rating,
       ${search.count} AS matched_dishes_count,
       COALESCE((SELECT jsonb_agg(to_jsonb(matched)||jsonb_build_object('price',matched.price::text)) FROM
         (SELECT m.* FROM menu_items m WHERE ${Boolean(search.needle)} AND m.restaurant_id=r.id AND ${search.dish} ORDER BY m.price,m.name,m.id LIMIT 3) matched),'[]'::jsonb) AS matched_dishes
-      FROM restaurants r WHERE ${search.where} ORDER BY r.is_active DESC,r.name,r.id`,page);
+      FROM restaurants r WHERE ${search.where} ORDER BY ${Prisma.raw(order)},r.id`,page);
   }
   async map(q='') {
     const search=this.search(q);

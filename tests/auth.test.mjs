@@ -41,6 +41,33 @@ before(async()=>{
 after(async()=>{await app?.close();await pool?.end();if(admin){if(/^delivery_auth_test_\d+_\d+$/.test(database))await admin.query('DROP DATABASE '+database+' WITH (FORCE)');await admin.end();}runtime?.stop();});
 const draft=(key,extra={})=>({request_key:createHash('sha256').update(key).digest('hex'),full_name:'Одержувач',phone:'+380000000904',restaurant_id:dish.restaurant_id,delivery_address:'Демонстраційна адреса, 2',delivery_note:'',payment_method:'готівка',expected_total:Number(dish.price).toFixed(2),items:[{menu_item_id:dish.id,quantity:1}],...extra});
 
+test('керування замовленнями: редагування доставки й видалення чернеток доступні лише адміністратору',async()=>{
+  const cookie=operator.cookie;
+  const payload=draft('manage-order',{delivery_latitude:50.45,delivery_longitude:30.52});
+  const {id}=await read(await query('/orders',{cookie,method:'POST',body:{...payload,customer_id:alice.user.customer_id}}));
+  const path='/orders/'+id;
+  const change={expected_version:0,delivery_address:payload.delivery_address,delivery_note:'Біля входу'};
+  assert.equal((await query(path,{cookie:alice.cookie,method:'PATCH',body:change})).status,403);
+  assert.equal((await query(path,{cookie:alice.cookie,method:'DELETE'})).status,403);
+  await read(await query(path,{cookie,method:'PATCH',body:change}));
+  const saved=await read(await query(path,{cookie}));
+  assert.equal(saved.delivery_note,'Біля входу');
+  assert.equal(saved.delivery_latitude,50.45);
+  assert.equal(saved.can_delete,true);
+  assert.equal((await query(path,{cookie,method:'PATCH',body:change})).status,409);
+  await read(await query(path,{cookie,method:'PATCH',body:{...change,expected_version:saved.address_version,delivery_address:'Демонстраційна адреса, 5'}}));
+  assert.equal((await read(await query(path,{cookie}))).delivery_latitude,null);
+  await read(await query(path+'/status',{cookie,method:'PATCH',body:{status:'скасовано',expected_status:'створено'}}));
+  assert.deepEqual(await read(await query(path,{cookie,method:'DELETE'})),{id});
+  assert.equal((await query(path,{cookie})).status,404);
+  assert.equal((await pool.query('SELECT id FROM order_items WHERE order_id=$1',[id])).rowCount,0);
+
+  const order=await read(await query('/orders/checkout',{cookie:bob.cookie,method:'POST',body:payload}));
+  assert.equal((await read(await query('/orders/'+order.id,{cookie}))).can_delete,false);
+  assert.equal((await query('/orders/'+order.id,{cookie,method:'DELETE'})).status,409);
+  assert.deepEqual(await read(await query('/orders/checkout',{cookie:bob.cookie,method:'POST',body:payload})),order);
+});
+
 test('auth seed: повтор зберігає всі попередні бізнес-записи й не переписує акаунти',async()=>{
   assert.deepEqual(seedResults,[{added:2},{added:0}]);
   for(const table of businessTables)assert.deepEqual(seededRows[table].filter(row=>originalRows[table].some(old=>(table==='_checkout_requests'?old.request_key===row.request_key:old.id===row.id))),originalRows[table],table);

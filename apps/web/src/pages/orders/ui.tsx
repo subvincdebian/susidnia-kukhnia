@@ -12,6 +12,8 @@ import {
   Field,
   Heading,
   Pagination,
+  PageLink,
+  Table,
   Search,
 } from "../../shared/ui";
 
@@ -23,16 +25,19 @@ export function OrdersPage({
   const params = useLocationParams(),
     q = params.get("q") ?? "",
     status = params.get("status") ?? "",
+    customer_id = params.get("customer_id") ?? "",
+    restaurant_id = params.get("restaurant_id") ?? "",
+    sort = params.get("sort") || "date_desc",
     page = params.get("page") ?? "1";
   const boot = useResource<Bootstrap>("/bootstrap");
   const resource = useResource<Page<Order>>(
-    `/orders?${new URLSearchParams({ q, status, page })}`,
+    `/orders?${new URLSearchParams({ q, status, page, customer_id, restaurant_id, sort })}`,
   );
   useEffect(() => {
     if (resource.data && Number(page) !== resource.data.page)
       navigate({ page: resource.data.page }, true);
   }, [resource.data, page]);
-  const reset = () => navigate({ q: null, status: null, page: null }, true);
+  const reset = () => navigate({ q: null, status: null, restaurant_id: null, customer_id: null, page: null }, true);
   return (
     <>
       <Heading
@@ -46,6 +51,14 @@ export function OrdersPage({
           Нове замовлення
         </button>
       </Heading>
+      {customer_id && (
+        <div className="actions spaced">
+          <PageLink view="customers">До клієнтів</PageLink>
+          <button type="button" onClick={() => navigate({ customer_id: null, page: null })}>
+            Показати всіх клієнтів
+          </button>
+        </div>
+      )}
       <div className="toolbar">
         <Search
           value={q}
@@ -72,6 +85,17 @@ export function OrdersPage({
             ).map((value) => ({ value, label: value })),
           ]}
         />
+        <Field
+          name="filter-restaurant"
+          label="Заклад"
+          required={false}
+          value={restaurant_id}
+          onChange={(value) => navigate({ restaurant_id: value, page: null })}
+          options={[
+            { value: "", label: "Усі заклади" },
+            ...(boot.data?.restaurants ?? []).map(({ id, name }) => ({ value: id, label: name })),
+          ]}
+        />
         <button onClick={invalidateResources}>Оновити</button>
       </div>
       <Async resource={resource}>
@@ -80,6 +104,8 @@ export function OrdersPage({
             {data.items.length ? (
               <TableOfOrders
                 orders={data.items}
+                sort={sort}
+                onSort={(value) => navigate({ sort: value, page: null })}
                 onOpen={(id) => onDialog({ type: "order", id })}
               />
             ) : (
@@ -99,28 +125,35 @@ export function OrdersPage({
     </>
   );
 }
-import { Table } from "../../shared/ui";
 
 interface Bootstrap {
   statuses: OrderStatus[];
+  restaurants: { id: number; name: string }[];
 }
 function TableOfOrders({
   orders,
   onOpen,
+  sort,
+  onSort,
 }: {
   orders: Order[];
+  sort: string;
+  onSort: (value: string) => void;
   onOpen: (id: number) => void;
 }) {
   return (
     <Table
       label="Замовлення"
-      headers={["Замовлення", "Клієнт", "Заклад", "Статус", "Сума", "Кур'єр"]}
+      headers={["Замовлення", "Клієнт", "Заклад", "Статус", "Сума", "Кур'єр", "Дата й час"]}
+      sortKeys={["id", "customer", "restaurant", "status", "total", "courier", "date"]}
+      sort={sort}
+      onSort={onSort}
+      rowKeys={orders.map(({ id }) => id)}
       rows={orders.map((order) => [
         <>
           <button className="row-link" onClick={() => onOpen(order.id)}>
             № {order.id}
           </button>
-          <span className="subline">{dateTime(order.order_date)}</span>
         </>,
         order.customer,
         order.restaurant,
@@ -130,6 +163,7 @@ function TableOfOrders({
           {order.payment_method && <span className="subline">{order.payment_refunded_at ? "Повернено" : "Оплачено"}</span>}
         </>,
         order.courier || "Не призначено",
+        <time className="nowrap" dateTime={order.order_date}>{dateTime(order.order_date)}</time>,
       ])}
     />
   );

@@ -5,7 +5,7 @@ import type { Restaurant } from "../../entities/restaurant";
 import type { DialogState } from "../../widgets/workspace-dialog";
 import { useResource } from "../../shared/api";
 import { navigate, useLocationParams } from "../../shared/lib";
-import { Async, Empty, Heading, Pagination, Search } from "../../shared/ui";
+import { Async, Empty, Field, Heading, Pagination, Search } from "../../shared/ui";
 
 export function RestaurantsPage({
   onDialog,
@@ -14,9 +14,10 @@ export function RestaurantsPage({
 }) {
   const params = useLocationParams(),
     q = params.get("q") ?? "",
+    restaurantSort = params.get("restaurant_sort") ?? "",
     page = params.get("page") ?? "1";
   const resource = useResource<Page<Restaurant>>(
-    `/restaurants?${new URLSearchParams({ q, page })}`,
+    `/restaurants?${new URLSearchParams({ q, page, sort: restaurantSort })}`,
   );
   useEffect(() => {
     if (resource.data && Number(page) !== resource.data.page)
@@ -42,6 +43,20 @@ export function RestaurantsPage({
           placeholder="Назва закладу або кухня"
           onSearch={(value) => navigate({ q: value, page: null }, true)}
           onClear={reset}
+        />
+
+        <Field
+          name="restaurant-sort"
+          label="Сортування закладів"
+          value={restaurantSort}
+          required={false}
+          onChange={(value) => navigate({ restaurant_sort: value, page: null })}
+          options={[
+            { value: "", label: "Активні спочатку" },
+            { value: "name_asc", label: "Назва А–Я" },
+            { value: "name_desc", label: "Назва Я–А" },
+            { value: "cuisine_asc", label: "Кухня А–Я" },
+          ]}
         />
       </div>
       <Async resource={resource}>

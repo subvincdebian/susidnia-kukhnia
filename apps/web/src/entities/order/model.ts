@@ -21,6 +21,7 @@ export interface Order {
 }
 export interface OrderDetail
   extends Omit<Order, "payment_method" | "payment_refunded_at"> {
+  can_delete?: boolean;
   customer_phone: string;
   courier_id: number | null;
   courier_phone: string | null;

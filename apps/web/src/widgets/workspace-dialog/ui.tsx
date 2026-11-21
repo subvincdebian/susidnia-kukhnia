@@ -144,6 +144,7 @@ export function WorkspaceDialog({
         <OrderManage
           id={state.id}
           onReview={(orderId) => onChange({ type: "review", orderId })}
+          onRemoved={() => saved("Замовлення видалено")}
           renderDelivery={(order) => <DeliveryTracking order={order} mode="operator" />}
         />
       );

@@ -3,16 +3,19 @@ import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 import { Receipt, Status } from "../../entities/order";
 import type { OrderDetail, OrderStatus } from "../../entities/order";
-import { api, useResource } from "../../shared/api";
+import { api, ApiError, invalidateResources, useResource } from "../../shared/api";
 import { dateTime, money } from "../../shared/lib";
 import {
   Async,
+  AddressField,
   Field,
   AppForm,
   numberValue,
   textValue,
+  useModal,
   useNotify,
 } from "../../shared/ui";
+import type { AddressValue } from "../../shared/ui";
 
 interface Bootstrap {
   couriers: Courier[];
@@ -22,10 +25,12 @@ interface Bootstrap {
 export function OrderManage({
   id,
   onReview,
+  onRemoved,
   renderDelivery,
 }: {
   id: number;
   onReview: (orderId: number) => void;
+  onRemoved: () => void;
   renderDelivery?: (order: OrderDetail) => ReactNode;
 }) {
   const order = useResource<OrderDetail>(`/orders/${id}`);
@@ -53,6 +58,7 @@ export function OrderManage({
                 order={data}
                 boot={bootstrap}
                 onReview={onReview}
+                onRemoved={onRemoved}
               />
               {renderDelivery?.(data)}
             </>
@@ -66,13 +72,17 @@ function OrderContent({
   order: o,
   boot,
   onReview,
+  onRemoved,
 }: {
   order: OrderDetail;
   boot: Bootstrap;
   onReview: (orderId: number) => void;
+  onRemoved: () => void;
 }) {
   const [note, setNote] = useState(o.delivery_note ?? "");
   const [cancel, setCancel] = useState(false);
+  const [remove, setRemove] = useState(false);
+  const [editing, setEditing] = useState(false);
   const notify = useNotify();
   const final =
     o.delivery_status === "доставлено" || o.delivery_status === "скасовано";
@@ -82,6 +92,9 @@ function OrderContent({
     "в дорозі": "доставлено",
   };
   const next = transitions[o.delivery_status];
+  const canEditDelivery =
+    (o.delivery_status === "створено" || o.delivery_status === "готується") &&
+    o.courier_id === null;
   const labels: Partial<Record<OrderStatus, string>> = {
     готується: "Почати приготування",
     "в дорозі": "Передати кур'єру",
@@ -118,6 +131,24 @@ function OrderContent({
           </p>
         </AppForm>
       </>
+    );
+  if (remove)
+    return (
+      <AppForm
+        danger
+        submitLabel="Видалити замовлення"
+        cancelLabel="Повернутися"
+        onCancel={() => setRemove(false)}
+        onSubmit={() => api.write(`/orders/${o.id}`, "DELETE", {})}
+        onSuccess={onRemoved}
+      >
+        <h3>Видалити замовлення № {o.id}?</h3>
+        <p>Замовлення та його позиції буде видалено остаточно.</p>
+      </AppForm>
+    );
+  if (editing && canEditDelivery)
+    return (
+      <EditDelivery order={o} onClose={() => setEditing(false)} />
     );
   const guardNote = () => {
     if (note !== (o.delivery_note ?? "")) {
@@ -158,13 +189,27 @@ function OrderContent({
         <dd>{o.courier || "Не призначено"}</dd>
       </dl>
       <Receipt order={o} />
+      {(canEditDelivery || o.can_delete) && (
+        <div className="actions spaced">
+          {canEditDelivery && (
+            <button type="button" onClick={() => setEditing(true)}>
+              Редагувати замовлення
+            </button>
+          )}
+          {o.can_delete && (
+            <button type="button" className="danger" onClick={() => setRemove(true)}>
+              Видалити замовлення
+            </button>
+          )}
+        </div>
+      )}
       {o.payment && (
         <p className={`status ${o.payment.refunded_at ? "" : "green"} spaced`}>
           {o.payment.refunded_at ? "Оплату повернено" : "Оплачено"}:{" "}
           {money(o.payment.amount)}, {o.payment.method}
         </p>
       )}
-      {final ? (
+      {final || canEditDelivery ? (
         <p className="small spaced">Примітка: {o.delivery_note || "Немає"}</p>
       ) : (
         <AppForm
@@ -308,5 +353,59 @@ function OrderContent({
         </p>
       )}
     </>
+  );
+}
+
+function EditDelivery({ order, onClose }: { order: OrderDetail; onClose: () => void }) {
+  const [version] = useState(order.address_version);
+  const [address, setAddress] = useState<AddressValue>({
+    address: order.delivery_address,
+    latitude: order.delivery_latitude,
+    longitude: order.delivery_longitude,
+  });
+  const notify = useNotify();
+  const modal = useModal();
+  return (
+    <AppForm
+      onCancel={() => {
+        modal?.setDirty(false);
+        onClose();
+      }}
+      onSubmit={async (data) => {
+        try {
+          return await api.write(`/orders/${order.id}`, "PATCH", {
+            expected_version: version,
+            delivery_address: textValue(data, "delivery_address"),
+            delivery_note: textValue(data, "delivery_note"),
+            ...(address.latitude !== null && address.longitude !== null
+              ? { delivery_latitude: address.latitude, delivery_longitude: address.longitude }
+              : {}),
+          });
+        } catch (error) {
+          if (error instanceof ApiError && error.status === 409) invalidateResources();
+          throw error;
+        }
+      }}
+      onSuccess={() => {
+        notify("Замовлення збережено");
+        onClose();
+      }}
+    >
+      <h3>Редагувати замовлення № {order.id}</h3>
+      {version !== order.address_version && (
+        <p className="inline-alert" role="status">
+          Поточна адреса змінилася. Поверніться до замовлення й відкрийте редагування ще раз.
+        </p>
+      )}
+      <AddressField value={address} onChange={setAddress} />
+      <Field
+        name="delivery_note"
+        label="Примітка до доставки"
+        type="textarea"
+        maxLength={500}
+        required={false}
+        defaultValue={order.delivery_note}
+      />
+    </AppForm>
   );
 }

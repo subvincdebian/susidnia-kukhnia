@@ -366,14 +366,10 @@ dialog:has(.dish-comparison) {
 }
 .comparison-scroll {
   max-width: 100%;
-  overflow-x: auto;
-  border: 1px solid var(--home-line);
-  border-radius: var(--radius);
 }
 .comparison-scroll table {
   width: 100%;
-  min-width: 42rem;
-  table-layout: fixed;
+  min-width: 76rem;
   border-collapse: separate;
   border-spacing: 0;
   font-size: 0.8125rem;
@@ -388,13 +384,7 @@ dialog:has(.dish-comparison) {
   border-bottom: 1px solid var(--home-line);
 }
 .comparison-scroll th:first-child {
-  width: 8rem;
-}
-.comparison-scroll th[scope="row"] {
-  position: sticky;
-  left: 0;
-  background: var(--surface);
-  z-index: 1;
+  min-width: 10rem;
 }
 .comparison-scroll th[scope="col"] {
   background: var(--surface);
@@ -414,11 +404,6 @@ dialog:has(.dish-comparison) {
 }
 .comparison-scroll details {
   margin-top: 0.5rem;
-}
-.comparison-price-row td {
-  color: var(--primary);
-  font-size: 1.2rem;
-  font-weight: 650;
 }
 .comparison-scroll tr:last-child > * {
   border-bottom: 0;

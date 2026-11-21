@@ -1,8 +1,9 @@
 import { useEffect } from "react";
 import type { Order } from "../../entities/order";
 import { useResource } from "../../shared/api";
-import { money, dateTime } from "../../shared/lib";
-import { Async, Empty, PageLink } from "../../shared/ui";
+import { money, dateTime, navigate, useLocationParams } from "../../shared/lib";
+import type { Page } from "../../shared/lib";
+import { Async, Empty, PageLink, Pagination } from "../../shared/ui";
 type RecentOrder = Pick<
   Order,
   | "id"
@@ -14,8 +15,9 @@ type RecentOrder = Pick<
   | "payment_refunded_at"
 >;
 export function HistoryPage() {
-  const resource = useResource<RecentOrder[]>("/orders/recent");
-  const active = resource.data?.some(
+  const page = useLocationParams().get("page") ?? "1";
+  const resource = useResource<Page<RecentOrder>>("/orders/history?" + new URLSearchParams({ page }));
+  const active = resource.data?.items.some(
     (order) => !["доставлено", "скасовано"].includes(order.delivery_status),
   );
   useEffect(() => {
@@ -31,7 +33,7 @@ export function HistoryPage() {
         <div>
           <p className="home-eyebrow">Все під рукою</p>
           <h1 tabIndex={-1}>Мої замовлення</h1>
-          <p>Останні 30 замовлень твого акаунта.</p>
+          <p>Замовлення твого акаунта.</p>
         </div>
           <button
             type="button"
@@ -42,10 +44,11 @@ export function HistoryPage() {
           </button>
       </header>
         <Async resource={resource} quiet>
-          {(orders) =>
-            orders.length ? (
+          {(data) =>
+            data.items.length ? (
+              <>
               <div className="order-history-grid">
-                {orders.map((order) => (
+                {data.items.map((order) => (
                   <article className="order-history-card" key={order.id}>
                     <div className="history-card-top">
                       <span>№ {order.id}</span>
@@ -73,6 +76,8 @@ export function HistoryPage() {
                   </article>
                 ))}
               </div>
+              <Pagination data={data} onPage={(value) => navigate({ page: value })} />
+              </>
             ) : (
               <>
                 <Empty

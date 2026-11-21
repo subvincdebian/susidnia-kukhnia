@@ -133,6 +133,7 @@ function AnalyticsResults({ data }: { data: Analytics }) {
                 <Table
                   label="Популярність страв"
                   headers={["Страва", "Замовлень", "Порцій"]}
+                  sortValues={data.dishes.map((dish) => [dish.name, Number(dish.orders_count), Number(dish.portions)])}
                   rows={data.dishes.map((dish) => [
                     dish.name,
                     dish.orders_count,
@@ -151,6 +152,7 @@ function AnalyticsResults({ data }: { data: Analytics }) {
             <Table
               label="Оцінки ресторанів"
               headers={["Заклад", "Середня оцінка", "Відгуків"]}
+              sortValues={data.ratings.map((row) => [row.name, Number(row.average_rating), Number(row.reviews_count)])}
               rows={data.ratings.map((restaurant) => [
                 restaurant.name,
                 restaurant.average_rating,
@@ -173,6 +175,7 @@ function AnalyticsResults({ data }: { data: Analytics }) {
             <Table
               label="Статуси замовлень"
               headers={["Статус", "Кількість", "Сума"]}
+              sortValues={data.status.map((row) => [row.delivery_status, Number(row.orders_count), Number(row.amount)])}
               rows={data.status.map((status) => [
                 <Status value={status.delivery_status} />,
                 status.orders_count,
@@ -188,6 +191,7 @@ function AnalyticsResults({ data }: { data: Analytics }) {
           <Table
             label="Виконані замовлення за закладами"
             headers={["Заклад", "Доставлено", "Сума"]}
+            sortValues={data.restaurants.map((row) => [row.name, Number(row.completed_orders), Number(row.amount)])}
             rows={data.restaurants.map((restaurant) => [
               restaurant.name,
               restaurant.completed_orders,

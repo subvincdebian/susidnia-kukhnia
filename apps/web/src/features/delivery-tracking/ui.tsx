@@ -206,11 +206,11 @@ export function DeliveryTracking({
         <div>
           <span className="delivery-eyebrow">Адреса доставки</span>
           <p className="delivery-contact-value">{order.delivery_address}</p>
-          {canEdit ? (
+          {canEdit && mode !== "operator" ? (
             <button type="button" onClick={() => setEditing(true)}>
               Змінити адресу
             </button>
-          ) : (
+          ) : canEdit ? null : (
             <p className="small">
               {active
                 ? "Кур’єр уже отримав замовлення. Зміни узгоджуються в чаті."

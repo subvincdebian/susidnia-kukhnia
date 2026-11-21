@@ -8,7 +8,7 @@ import type { Restaurant } from "../../entities/restaurant";
 import { useResource } from "../../shared/api";
 import { navigate, useLocationParams } from "../../shared/lib";
 import type { Page } from "../../shared/lib";
-import { Async, Empty, Pagination, Search } from "../../shared/ui";
+import { Async, Empty, Field, Pagination, Search } from "../../shared/ui";
 import { OfferResults } from "./offers";
 
 const cuisines = [
@@ -22,13 +22,14 @@ const cuisines = [
 export function CatalogPage() {
   const params = useLocationParams(),
     q = params.get("q") ?? "",
+    restaurantSort = params.get("restaurant_sort") ?? "",
     page = params.get("page") ?? "1";
   const map = params.get("display") === "map";
   const offers =
     params.get("display") === "dishes" ||
     (!params.get("display") && Boolean(q));
   const resource = useResource<Page<Restaurant>>(
-    map || offers ? null : `/restaurants?${new URLSearchParams({ q, page })}`,
+    map || offers ? null : `/restaurants?${new URLSearchParams({ q, page, sort: restaurantSort })}`,
   );
   useEffect(() => {
     if (!map && !offers && resource.data && Number(page) !== resource.data.page)
@@ -101,6 +102,21 @@ export function CatalogPage() {
           onClear={() => search("")}
         />
       </div>
+      {!offers && !map && <div className="toolbar">
+        <Field
+          name="restaurant-sort"
+          label="Сортування закладів"
+          value={restaurantSort}
+          required={false}
+          onChange={(value) => navigate({ restaurant_sort: value, page: null })}
+          options={[
+            { value: "", label: "Активні спочатку" },
+            { value: "name_asc", label: "Назва А–Я" },
+            { value: "name_desc", label: "Назва Я–А" },
+            { value: "cuisine_asc", label: "Кухня А–Я" },
+          ]}
+        />
+      </div>}
       {!offers && (
         <div className="shop-cuisine-filter" role="group" aria-label="Кухня">
           <button type="button" aria-pressed={!q} onClick={() => search("")}>

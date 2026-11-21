@@ -136,3 +136,12 @@ export function publicError(error: unknown): BrowserApiError {
   if (code === "40001" || code === "40P01") return new BrowserApiError("Дані змінилися одночасно. Оновіть сторінку та повторіть дію", {}, 409);
   return new BrowserApiError("Не вдалося виконати операцію. Повторіть спробу", {}, 500);
 }
+
+export function tableOrder(input: unknown, columns: Record<string, string>, fallback: string) {
+  if (typeof input !== "string") return fallback;
+  const match = /^([a-z_]+)_(asc|desc)$/.exec(input);
+  const key = match?.[1];
+  if (!key || !Object.hasOwn(columns, key)) return fallback;
+  const direction = match?.[2] === "asc" ? "ASC" : "DESC";
+  return columns[key] + " " + direction + " NULLS LAST";
+}
