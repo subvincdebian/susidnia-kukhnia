@@ -1,0 +1,32 @@
+name: "Повідомити про помилку"
+description: "Опишіть відтворювану помилку в навчальному застосунку."
+body:
+  - type: markdown
+    attributes:
+      value: "Приберіть персональні дані, токени й паролі зі скриншотів та логів. Про вразливості повідомляйте приватно через Security."
+  - type: input
+    id: area
+    attributes:
+      label: "Де виникла помилка?"
+      description: "Наприклад: каталог, оформлення замовлення, карта або локальний API. Це навчальна демонстрація доставки."
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: "Кроки відтворення"
+      description: "Опишіть дії від відкриття сторінки до появи помилки. Використовуйте тестові дані."
+    validations:
+      required: true
+  - type: textarea
+    id: behavior
+    attributes:
+      label: "Очікувана і фактична поведінка"
+      description: "Що мало статися і що сталося натомість?"
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: "Середовище"
+      description: "Вкажіть сторінку, браузер, пристрій і середовище (онлайн-демо або локальний запуск)."
