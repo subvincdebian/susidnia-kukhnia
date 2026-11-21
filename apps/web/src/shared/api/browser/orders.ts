@@ -9,6 +9,7 @@ interface OrderRow extends Row {
   delivery_status: string;
   address_version: number;
   delivery_address: string;
+  delivery_note: string | null;
   delivery_latitude: number | null;
   delivery_longitude: number | null;
 }
@@ -161,9 +162,14 @@ export function createOrders(db: PGliteInterface) {
     },
     changeAddress(id: number, input: unknown, adminEdit = false) {
       const body = object(input), expected = integer(body.expected_version, "expected_version", 0), address = text(body.delivery_address, "delivery_address", 200), position = optionalCoordinates(body);
-      const note = adminEdit ? text(body.delivery_note ?? "", "delivery_note", 500, 0) : null;
+      const note = adminEdit && body.delivery_note !== undefined
+        ? text(body.delivery_note, "delivery_note", 500, 0)
+        : null;
+      const expectedNote = note === null ? null : text(body.expected_note, "expected_note", 500, 0);
       return db.transaction(async (tx) => {
         const old = await lockOrder(tx, id);
+        if (expectedNote !== null && (old.delivery_note ?? "").trim() !== expectedNote)
+          fail(409, "Примітку вже змінено. Відкрийте редагування ще раз.");
         if (!["створено", "готується"].includes(old.delivery_status) || old.courier_id !== null)
           fail(409, "Адресу можна змінити лише до передавання кур'єру");
         if (old.address_version !== expected) fail(409, "Адресу вже змінено. Оновіть замовлення перед редагуванням");

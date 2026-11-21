@@ -315,9 +315,14 @@ export class OrdersService {
     const expected = integer(b.expected_version, "expected_version", 0);
     const address = text(b.delivery_address, "delivery_address", 200);
     const position = optionalCoordinates(b);
-    const note = adminEdit ? text(b.delivery_note ?? "", "delivery_note", 500, 0) : undefined;
+    const note = adminEdit && b.delivery_note !== undefined
+      ? text(b.delivery_note, "delivery_note", 500, 0)
+      : undefined;
+    const expectedNote = note === undefined ? undefined : text(b.expected_note, "expected_note", 500, 0);
     return this.db.$transaction(async (tx) => {
       const old = await this.lockOrder(tx, id);
+      if (expectedNote !== undefined && (old.delivery_note ?? "").trim() !== expectedNote)
+        throw new HttpError(409, "Примітку вже змінено. Відкрийте редагування ще раз.");
       if (!['створено','готується'].includes(old.delivery_status) || old.courier_id !== null)
         throw new HttpError(409, "Адресу можна змінити лише до передавання кур'єру");
       if (old.address_version !== expected)

@@ -358,6 +358,7 @@ function OrderContent({
 
 function EditDelivery({ order, onClose }: { order: OrderDetail; onClose: () => void }) {
   const [version] = useState(order.address_version);
+  const [initialNote] = useState(() => (order.delivery_note ?? "").trim());
   const [address, setAddress] = useState<AddressValue>({
     address: order.delivery_address,
     latitude: order.delivery_latitude,
@@ -373,10 +374,11 @@ function EditDelivery({ order, onClose }: { order: OrderDetail; onClose: () => v
       }}
       onSubmit={async (data) => {
         try {
+          const note = textValue(data, "delivery_note");
           return await api.write(`/orders/${order.id}`, "PATCH", {
             expected_version: version,
             delivery_address: textValue(data, "delivery_address"),
-            delivery_note: textValue(data, "delivery_note"),
+            ...(note !== initialNote ? { delivery_note: note, expected_note: initialNote } : {}),
             ...(address.latitude !== null && address.longitude !== null
               ? { delivery_latitude: address.latitude, delivery_longitude: address.longitude }
               : {}),

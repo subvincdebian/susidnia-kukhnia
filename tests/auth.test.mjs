@@ -46,7 +46,7 @@ test('керування замовленнями: редагування дос
   const payload=draft('manage-order',{delivery_latitude:50.45,delivery_longitude:30.52});
   const {id}=await read(await query('/orders',{cookie,method:'POST',body:{...payload,customer_id:alice.user.customer_id}}));
   const path='/orders/'+id;
-  const change={expected_version:0,delivery_address:payload.delivery_address,delivery_note:'Біля входу'};
+  const change={expected_version:0,delivery_address:payload.delivery_address,delivery_note:'Біля входу',expected_note:''};
   assert.equal((await query(path,{cookie:alice.cookie,method:'PATCH',body:change})).status,403);
   assert.equal((await query(path,{cookie:alice.cookie,method:'DELETE'})).status,403);
   await read(await query(path,{cookie,method:'PATCH',body:change}));
@@ -55,7 +55,10 @@ test('керування замовленнями: редагування дос
   assert.equal(saved.delivery_latitude,50.45);
   assert.equal(saved.can_delete,true);
   assert.equal((await query(path,{cookie,method:'PATCH',body:change})).status,409);
-  await read(await query(path,{cookie,method:'PATCH',body:{...change,expected_version:saved.address_version,delivery_address:'Демонстраційна адреса, 5'}}));
+  await read(await query(path+'/note',{cookie,method:'PATCH',body:{delivery_note:'Нова примітка'}}));
+  assert.equal((await query(path,{cookie,method:'PATCH',body:{...change,expected_version:saved.address_version,expected_note:saved.delivery_note}})).status,409);
+  await read(await query(path,{cookie,method:'PATCH',body:{expected_version:saved.address_version,delivery_address:'Демонстраційна адреса, 5'}}));
+  assert.equal((await read(await query(path,{cookie}))).delivery_note,'Нова примітка');
   assert.equal((await read(await query(path,{cookie}))).delivery_latitude,null);
   await read(await query(path+'/status',{cookie,method:'PATCH',body:{status:'скасовано',expected_status:'створено'}}));
   assert.deepEqual(await read(await query(path,{cookie,method:'DELETE'})),{id});

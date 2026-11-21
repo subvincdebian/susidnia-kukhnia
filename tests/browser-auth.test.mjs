@@ -51,7 +51,7 @@ test("admins can edit delivery details and remove manual drafts without erasing 
   const payload = checkout("e", { payment_method: "готівка", delivery_latitude: 50.45, delivery_longitude: 30.52 });
   const { id } = await admin.request("/orders", "POST", { ...payload, customer_id: user.customer_id });
   const path = `/orders/${id}`;
-  const change = { expected_version: 0, delivery_address: payload.delivery_address, delivery_note: "Біля входу" };
+  const change = { expected_version: 0, delivery_address: payload.delivery_address, delivery_note: "Біля входу", expected_note: "" };
   await assert.rejects(customer.request(path, "PATCH", change), denied(403));
   await assert.rejects(customer.request(path, "DELETE"), denied(403));
   await admin.request(path, "PATCH", change);
@@ -60,8 +60,11 @@ test("admins can edit delivery details and remove manual drafts without erasing 
   assert.equal(saved.delivery_latitude, 50.45);
   assert.equal(saved.can_delete, true);
   await assert.rejects(admin.request(path, "PATCH", change), denied(409));
-  await admin.request(path, "PATCH", { ...change, expected_version: saved.address_version, delivery_address: "Київ, Хрещатик, 5" });
+  await admin.request(path + "/note", "PATCH", { delivery_note: "Нова примітка" });
+  await assert.rejects(admin.request(path, "PATCH", { ...change, expected_version: saved.address_version, expected_note: saved.delivery_note }), denied(409));
+  await admin.request(path, "PATCH", { expected_version: saved.address_version, delivery_address: "Київ, Хрещатик, 5" });
   assert.equal((await admin.request(path)).delivery_latitude, null);
+  assert.equal((await admin.request(path)).delivery_note, "Нова примітка");
   await admin.request(path + "/status", "PATCH", { status: "скасовано", expected_status: "створено" });
   assert.deepEqual(await admin.request(path, "DELETE"), { id });
   await assert.rejects(admin.request(path), denied(404));
